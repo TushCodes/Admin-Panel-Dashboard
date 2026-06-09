@@ -11,6 +11,10 @@ import unittest
 from sqlalchemy import text
 
 from db import connection
+from utils.logging import get_logger
+
+
+LOGGER = get_logger("db_test")
 
 
 class SupabaseConnConfigTest(unittest.TestCase):
@@ -69,6 +73,7 @@ class SupabaseConnLiveTest(unittest.TestCase):
             val = session.execute(text("SELECT 1")).scalar_one()
 
         self.assertEqual(val, 1)
+        LOGGER.info("Live database connection succeeded.")
 
 
 if __name__ == "__main__":
