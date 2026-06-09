@@ -13,7 +13,7 @@ from .error_handling import (
     ValidationError,
     handle_exception,
 )
-from .error import (
+from .db_error import (
     DatabaseConnectionDisabledError,
     ensure_database_connection_enabled,
     is_database_connection_enabled,

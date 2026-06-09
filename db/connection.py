@@ -26,7 +26,7 @@ from sqlalchemy.engine import URL, make_url
 from sqlalchemy.orm import Session, sessionmaker
 
 from model import Base
-from utils.error import ensure_database_connection_enabled
+from utils.db_error import ensure_database_connection_enabled
 
 DATABASE_URL_ENV_NAMES = ("DATABASE_URL",)
 SECRET_KEY_ENV_NAMES = ("SECRET_KEY",)
