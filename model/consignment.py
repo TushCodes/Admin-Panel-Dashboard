@@ -6,7 +6,7 @@ from datetime import date
 from typing import Optional
 
 from sqlalchemy import CheckConstraint, Date, String, Text
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from . import Base
 
