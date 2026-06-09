@@ -13,7 +13,7 @@ from sqlalchemy import text
 from db import connection
 
 
-class SupabaseConnectionConfigurationTest(unittest.TestCase):
+class SupabaseConnConfigTest(unittest.TestCase):
     """Validate Supabase database URL configuration behavior."""
 
     def setUp(self) -> None:
@@ -33,7 +33,7 @@ class SupabaseConnectionConfigurationTest(unittest.TestCase):
             else:
                 os.environ[name] = value
 
-    def test_supabase_db_url_is_normalized_for_psycopg_driver(self) -> None:
+    def test_db_url_normalized(self) -> None:
         """Plain PostgreSQL URLs are normalized to SQLAlchemy's psycopg driver."""
         os.environ["SUPABASE_DB_URL"] = (
             "postgresql://postgres:secret@db.example.supabase.co:5432/postgres"
@@ -46,7 +46,7 @@ class SupabaseConnectionConfigurationTest(unittest.TestCase):
             "postgresql+psycopg://postgres:secret@db.example.supabase.co:5432/postgres",
         )
 
-    def test_missing_supabase_database_url_raises_helpful_error(self) -> None:
+    def test_missing_db_url_raises(self) -> None:
         """A clear error is raised when no supported connection URL is set."""
         with self.assertRaisesRegex(RuntimeError, "DATABASE_URL or SUPABASE_DB_URL"):
             connection.get_database_url()
@@ -56,13 +56,13 @@ class SupabaseConnectionConfigurationTest(unittest.TestCase):
     any(os.getenv(env_name) for env_name in connection.DATABASE_URL_ENV_NAMES),
     "Set DATABASE_URL or SUPABASE_DB_URL to run the live Supabase connection test.",
 )
-class SupabaseConnectionIntegrationTest(unittest.TestCase):
+class SupabaseConnLiveTest(unittest.TestCase):
     """Live Supabase connectivity test."""
 
     def tearDown(self) -> None:
         connection.close_db()
 
-    def test_supabase_connection_executes_select_one(self) -> None:
+    def test_executes_select_one(self) -> None:
         """The configured Supabase database accepts a simple SQL round trip."""
         with connection.db_session() as session:
             val = session.execute(text("SELECT 1")).scalar_one()
