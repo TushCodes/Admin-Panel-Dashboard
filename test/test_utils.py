@@ -5,6 +5,7 @@ from __future__ import annotations
 import unittest
 from datetime import date
 
+from utils.error import DatabaseConnectionDisabledError, ensure_database_connection_enabled
 from utils.error_handling import BadRequestError, NotFoundError, handle_exception
 from utils.json import json_response, parse_json_body, to_json
 from utils.logging import get_logger
@@ -68,6 +69,14 @@ class LoggingUtilsTest(unittest.TestCase):
         self.assertIs(first_logger, second_logger)
         self.assertEqual(first_logger.name, "admin_panel_dashboard.test")
         self.assertEqual(len(first_logger.handlers), 1)
+
+
+class DatabaseErrorUtilsTest(unittest.TestCase):
+    """Validate the database connection guard."""
+
+    def test_database_connection_disabled_raises(self) -> None:
+        with self.assertRaises(DatabaseConnectionDisabledError):
+            ensure_database_connection_enabled()
 
 
 if __name__ == "__main__":

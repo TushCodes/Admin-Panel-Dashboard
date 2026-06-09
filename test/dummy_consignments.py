@@ -123,7 +123,7 @@ def feed_dummy_consignments(
 def feed_dummy_consignments_directly(*, initialize_schema: bool = False) -> list[Any]:
     """Open a project DB session and feed the canonical 100 dummy consignments.
 
-    Set ``initialize_schema=True`` for local bootstrap databases that do not have
+    Set ``initialize_schema=True`` for bootstrap databases that do not have
     tables yet. Production-like environments should keep this false and rely on
     migrations/schema setup already present in the project.
     """

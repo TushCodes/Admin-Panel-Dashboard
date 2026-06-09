@@ -21,7 +21,7 @@ class SupabaseConnConfigTest(unittest.TestCase):
             name: os.environ.get(name)
             for name in connection.DATABASE_URL_ENV_NAMES
         }
-        for name in connection.DATABASE_URL_ENV_NAMES:
+        for name in self._orig_env:
             os.environ.pop(name, None)
         connection.get_engine.cache_clear()
 
@@ -35,7 +35,7 @@ class SupabaseConnConfigTest(unittest.TestCase):
 
     def test_db_url_normalized(self) -> None:
         """Plain PostgreSQL URLs are normalized to SQLAlchemy's psycopg driver."""
-        os.environ["SUPABASE_DB_URL"] = (
+        os.environ["DATABASE_URL"] = (
             "postgresql://postgres:secret@db.example.supabase.co:5432/postgres"
         )
 
@@ -48,13 +48,14 @@ class SupabaseConnConfigTest(unittest.TestCase):
 
     def test_missing_db_url_raises(self) -> None:
         """A clear error is raised when no supported connection URL is set."""
-        with self.assertRaisesRegex(RuntimeError, "DATABASE_URL or SUPABASE_DB_URL"):
+        with self.assertRaisesRegex(RuntimeError, "DATABASE_URL"):
             connection.get_database_url()
 
 
 @unittest.skipUnless(
-    any(os.getenv(env_name) for env_name in connection.DATABASE_URL_ENV_NAMES),
-    "Set DATABASE_URL or SUPABASE_DB_URL to run the live Supabase connection test.",
+    any(os.getenv(env_name) for env_name in connection.DATABASE_URL_ENV_NAMES)
+    and any(os.getenv(env_name) for env_name in connection.SECRET_KEY_ENV_NAMES),
+    "Set DATABASE_URL and SECRET_KEY to run the live Supabase connection test.",
 )
 class SupabaseConnLiveTest(unittest.TestCase):
     """Live Supabase connectivity test."""

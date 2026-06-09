@@ -1,11 +1,11 @@
 """Supabase PostgreSQL database connection utilities.
 
-The Render deployment should provide the real connection string through the
-``DATABASE_URL`` environment variable. These helpers read that secret lazily only
-when a database engine/session is created, then pass it directly to SQLAlchemy.
+The application reads ``DATABASE_URL`` and ``SECRET_KEY`` lazily only when a
+database engine/session is created. These values are not stored in source code
+and are passed directly to SQLAlchemy for the active database connection path.
 
-Set ``DATABASE_URL`` or ``SUPABASE_DB_URL`` before using these helpers. Example
-formats accepted by SQLAlchemy:
+Set ``DATABASE_URL`` before using these helpers. Example formats accepted by
+SQLAlchemy:
 
 - postgresql+psycopg://user:password@host:5432/postgres
 - postgresql://user:password@host:5432/postgres
@@ -26,21 +26,10 @@ from sqlalchemy.engine import URL, make_url
 from sqlalchemy.orm import Session, sessionmaker
 
 from model import Base
+from utils.error import ensure_database_connection_enabled
 
-DATABASE_URL_ENV_NAMES = ("DATABASE_URL", "SUPABASE_DB_URL")
-
-
-def _normalize_database_url(database_url: str) -> str:
-    """Return a SQLAlchemy-compatible PostgreSQL URL.
-
-    Supabase connection strings are sometimes copied as ``postgresql://...``.
-    SQLAlchemy can use that form when a default driver is installed, but this
-    project pins the modern psycopg driver, so normalize to the explicit driver
-    URL for consistent local and deployed behavior.
-    """
-    if database_url.startswith("postgresql://"):
-        return database_url.replace("postgresql://", "postgresql+psycopg://", 1)
-    return database_url
+DATABASE_URL_ENV_NAMES = ("DATABASE_URL",)
+SECRET_KEY_ENV_NAMES = ("SECRET_KEY",)
 
 
 def _redacted_database_url(database_url: str) -> str:
@@ -56,29 +45,35 @@ def _redacted_database_url(database_url: str) -> str:
 def get_database_url() -> str:
     """Read the configured Supabase PostgreSQL connection URL.
 
-    The URL is intentionally read from Render/local environment only at call
-    time. This keeps deployment secrets out of imports, module globals, and the
+    This keeps deployment secrets out of imports, module globals, and the
     repository while still propagating them to SQLAlchemy for the actual
     database connection.
 
     Raises:
         RuntimeError: If neither supported environment variable is configured.
     """
-    for env_name in DATABASE_URL_ENV_NAMES:
-        database_url = os.getenv(env_name)
-        if database_url:
-            return _normalize_database_url(database_url)
+    database_url = os.getenv("DATABASE_URL")
+    if database_url:
+        if database_url.startswith("postgresql://"):
+            return database_url.replace("postgresql://", "postgresql+psycopg://", 1)
+        return database_url
 
-    supported_names = " or ".join(DATABASE_URL_ENV_NAMES)
-    raise RuntimeError(
-        f"Database connection is not configured. Set {supported_names} with "
-        "your Supabase PostgreSQL connection string."
-    )
+    raise RuntimeError("Set DATABASE_URL for the database connection.")
+
+
+def get_secret_key() -> str:
+    """Read the configured secret key from ``SECRET_KEY``."""
+    secret_key = os.getenv("SECRET_KEY")
+    if secret_key:
+        return secret_key
+
+    raise RuntimeError("Set SECRET_KEY for the secret key.")
 
 
 @lru_cache(maxsize=1)
 def get_engine() -> Engine:
     """Create and cache the SQLAlchemy engine for Supabase PostgreSQL."""
+    ensure_database_connection_enabled()
     database_url = get_database_url()
     try:
         return create_engine(
