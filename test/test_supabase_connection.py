@@ -17,21 +17,21 @@ class SupabaseConnectionConfigurationTest(unittest.TestCase):
     """Validate Supabase database URL configuration behavior."""
 
     def setUp(self) -> None:
-        self._original_env = {
-            env_name: os.environ.get(env_name)
-            for env_name in connection.DATABASE_URL_ENV_NAMES
+        self._orig_env = {
+            name: os.environ.get(name)
+            for name in connection.DATABASE_URL_ENV_NAMES
         }
-        for env_name in connection.DATABASE_URL_ENV_NAMES:
-            os.environ.pop(env_name, None)
+        for name in connection.DATABASE_URL_ENV_NAMES:
+            os.environ.pop(name, None)
         connection.get_engine.cache_clear()
 
     def tearDown(self) -> None:
         connection.close_db()
-        for env_name, value in self._original_env.items():
+        for name, value in self._orig_env.items():
             if value is None:
-                os.environ.pop(env_name, None)
+                os.environ.pop(name, None)
             else:
-                os.environ[env_name] = value
+                os.environ[name] = value
 
     def test_supabase_db_url_is_normalized_for_psycopg_driver(self) -> None:
         """Plain PostgreSQL URLs are normalized to SQLAlchemy's psycopg driver."""
@@ -39,10 +39,10 @@ class SupabaseConnectionConfigurationTest(unittest.TestCase):
             "postgresql://postgres:secret@db.example.supabase.co:5432/postgres"
         )
 
-        database_url = connection.get_database_url()
+        url = connection.get_database_url()
 
         self.assertEqual(
-            database_url,
+            url,
             "postgresql+psycopg://postgres:secret@db.example.supabase.co:5432/postgres",
         )
 
@@ -65,9 +65,9 @@ class SupabaseConnectionIntegrationTest(unittest.TestCase):
     def test_supabase_connection_executes_select_one(self) -> None:
         """The configured Supabase database accepts a simple SQL round trip."""
         with connection.db_session() as session:
-            result = session.execute(text("SELECT 1")).scalar_one()
+            val = session.execute(text("SELECT 1")).scalar_one()
 
-        self.assertEqual(result, 1)
+        self.assertEqual(val, 1)
 
 
 if __name__ == "__main__":
