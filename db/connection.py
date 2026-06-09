@@ -1,7 +1,11 @@
 """Supabase PostgreSQL database connection utilities.
 
-Set `DATABASE_URL` or `SUPABASE_DB_URL` to the Supabase PostgreSQL connection
-string before using these helpers. Example formats accepted by SQLAlchemy:
+The Render deployment should provide the real connection string through the
+``DATABASE_URL`` environment variable. These helpers read that secret lazily only
+when a database engine/session is created, then pass it directly to SQLAlchemy.
+
+Set ``DATABASE_URL`` or ``SUPABASE_DB_URL`` before using these helpers. Example
+formats accepted by SQLAlchemy:
 
 - postgresql+psycopg://user:password@host:5432/postgres
 - postgresql://user:password@host:5432/postgres
@@ -13,10 +17,12 @@ environment file or deployment secret store.
 from __future__ import annotations
 
 import os
-from collections.abc import Generator
+from collections.abc import Generator, Iterator
+from contextlib import contextmanager
 from functools import lru_cache
 
 from sqlalchemy import Engine, create_engine
+from sqlalchemy.engine import URL, make_url
 from sqlalchemy.orm import Session, sessionmaker
 
 from model import Base
@@ -27,7 +33,7 @@ DATABASE_URL_ENV_NAMES = ("DATABASE_URL", "SUPABASE_DB_URL")
 def _normalize_database_url(database_url: str) -> str:
     """Return a SQLAlchemy-compatible PostgreSQL URL.
 
-    Supabase connection strings are sometimes copied as `postgresql://...`.
+    Supabase connection strings are sometimes copied as ``postgresql://...``.
     SQLAlchemy can use that form when a default driver is installed, but this
     project pins the modern psycopg driver, so normalize to the explicit driver
     URL for consistent local and deployed behavior.
@@ -37,8 +43,23 @@ def _normalize_database_url(database_url: str) -> str:
     return database_url
 
 
+def _redacted_database_url(database_url: str) -> str:
+    """Return the database URL with any password hidden for safe errors/logs."""
+    try:
+        url: URL = make_url(database_url)
+    except Exception:
+        return "<invalid database URL>"
+
+    return str(url.set(password="***") if url.password else url)
+
+
 def get_database_url() -> str:
     """Read the configured Supabase PostgreSQL connection URL.
+
+    The URL is intentionally read from Render/local environment only at call
+    time. This keeps deployment secrets out of imports, module globals, and the
+    repository while still propagating them to SQLAlchemy for the actual
+    database connection.
 
     Raises:
         RuntimeError: If neither supported environment variable is configured.
@@ -58,12 +79,17 @@ def get_database_url() -> str:
 @lru_cache(maxsize=1)
 def get_engine() -> Engine:
     """Create and cache the SQLAlchemy engine for Supabase PostgreSQL."""
-    return create_engine(
-        get_database_url(),
-        pool_pre_ping=True,
-        pool_recycle=300,
-        future=True,
-    )
+    database_url = get_database_url()
+    try:
+        return create_engine(
+            database_url,
+            pool_pre_ping=True,
+            pool_recycle=300,
+            future=True,
+        )
+    except Exception as exc:
+        safe_url = _redacted_database_url(database_url)
+        raise RuntimeError(f"Could not create database engine for {safe_url}.") from exc
 
 
 _session_factory = sessionmaker(
@@ -79,6 +105,23 @@ def SessionLocal() -> Session:
     return _session_factory(bind=get_engine())
 
 
+@contextmanager
+def db_session() -> Iterator[Session]:
+    """Open a database session for one unit of work and close it afterward.
+
+    Use this when code needs the Render-provided database environment only for
+    the active connection scope:
+
+        with db_session() as db:
+            db.execute(...)
+    """
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
 def get_db() -> Generator[Session, None, None]:
     """Yield a database session and always close it after use.
 
@@ -87,11 +130,8 @@ def get_db() -> Generator[Session, None, None]:
 
         db = next(get_db())
     """
-    db = SessionLocal()
-    try:
+    with db_session() as db:
         yield db
-    finally:
-        db.close()
 
 
 def close_db() -> None:
