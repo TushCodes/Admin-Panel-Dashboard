@@ -9,6 +9,7 @@ import os
 import unittest
 
 from sqlalchemy import text
+from sqlalchemy.engine import URL
 
 from db import connection
 from utils.logging import get_logger
@@ -39,15 +40,23 @@ class SupabaseConnConfigTest(unittest.TestCase):
 
     def test_db_url_normalized(self) -> None:
         """Plain PostgreSQL URLs are normalized to SQLAlchemy's psycopg driver."""
-        os.environ["DATABASE_URL"] = (
-            "postgresql://postgres:secret@db.example.supabase.co:5432/postgres"
+        sample_url = URL.create(
+            drivername="postgresql",
+            username="postgres",
+            password="secret",
+            host="db.example.supabase.co",
+            port=5432,
+            database="postgres",
         )
+        os.environ["DATABASE_URL"] = sample_url.render_as_string(hide_password=False)
 
         url = connection.get_database_url()
 
         self.assertEqual(
             url,
-            "postgresql+psycopg://postgres:secret@db.example.supabase.co:5432/postgres",
+            sample_url.set(drivername="postgresql+psycopg").render_as_string(
+                hide_password=False
+            ),
         )
 
     def test_missing_db_url_raises(self) -> None:
