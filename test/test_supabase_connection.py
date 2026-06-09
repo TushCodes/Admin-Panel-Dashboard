@@ -1,0 +1,74 @@
+"""Tests for the Supabase PostgreSQL connection helpers.
+
+The live connection check is intentionally skipped unless a Supabase database URL
+is provided through the same environment variables used by the application.
+"""
+from __future__ import annotations
+
+import os
+import unittest
+
+from sqlalchemy import text
+
+from db import connection
+
+
+class SupabaseConnectionConfigurationTest(unittest.TestCase):
+    """Validate Supabase database URL configuration behavior."""
+
+    def setUp(self) -> None:
+        self._original_env = {
+            env_name: os.environ.get(env_name)
+            for env_name in connection.DATABASE_URL_ENV_NAMES
+        }
+        for env_name in connection.DATABASE_URL_ENV_NAMES:
+            os.environ.pop(env_name, None)
+        connection.get_engine.cache_clear()
+
+    def tearDown(self) -> None:
+        connection.close_db()
+        for env_name, value in self._original_env.items():
+            if value is None:
+                os.environ.pop(env_name, None)
+            else:
+                os.environ[env_name] = value
+
+    def test_supabase_db_url_is_normalized_for_psycopg_driver(self) -> None:
+        """Plain PostgreSQL URLs are normalized to SQLAlchemy's psycopg driver."""
+        os.environ["SUPABASE_DB_URL"] = (
+            "postgresql://postgres:secret@db.example.supabase.co:5432/postgres"
+        )
+
+        database_url = connection.get_database_url()
+
+        self.assertEqual(
+            database_url,
+            "postgresql+psycopg://postgres:secret@db.example.supabase.co:5432/postgres",
+        )
+
+    def test_missing_supabase_database_url_raises_helpful_error(self) -> None:
+        """A clear error is raised when no supported connection URL is set."""
+        with self.assertRaisesRegex(RuntimeError, "DATABASE_URL or SUPABASE_DB_URL"):
+            connection.get_database_url()
+
+
+@unittest.skipUnless(
+    any(os.getenv(env_name) for env_name in connection.DATABASE_URL_ENV_NAMES),
+    "Set DATABASE_URL or SUPABASE_DB_URL to run the live Supabase connection test.",
+)
+class SupabaseConnectionIntegrationTest(unittest.TestCase):
+    """Live Supabase connectivity test."""
+
+    def tearDown(self) -> None:
+        connection.close_db()
+
+    def test_supabase_connection_executes_select_one(self) -> None:
+        """The configured Supabase database accepts a simple SQL round trip."""
+        with connection.db_session() as session:
+            result = session.execute(text("SELECT 1")).scalar_one()
+
+        self.assertEqual(result, 1)
+
+
+if __name__ == "__main__":
+    unittest.main()
