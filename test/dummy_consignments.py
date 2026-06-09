@@ -53,7 +53,7 @@ def _build_dummy_consignment(index: int) -> dict[str, Any]:
     pickup_date = BASE_PICKUP_DATE + timedelta(days=index - 1)
 
     return {
-        "consignment_num": f"TEST-CN-{index:04d}",
+        "consignment_num": f"CN{index:014d}",
         "status": STATUSES[(index - 1) % len(STATUSES)],
         "pickup_address": f"Warehouse {(index % 25) + 1}, {100 + index} Test Pickup Road, {pickup_city}",
         "pickup_pincode": pickup_pincode,

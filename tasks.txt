@@ -1,0 +1,5 @@
+TEST CASES
+Will create a test case for supabase connection check
+Will create a request-response test to check if db is fetching the data and the right data
+
+ERROR HANDLING, LOGGING AND UTILS
