@@ -5,10 +5,8 @@ from __future__ import annotations
 import unittest
 
 from utils.error_handling import BadRequestError
-from utils.pagination import paginate_items, parse_page
-from utils.pagination.filters import parse_filters
+from utils.pagination import paginate_items, parse_filters, parse_page, parse_sort
 from utils.pagination.response import meta, page_response
-from utils.pagination.sort import parse_sort
 
 
 class PaginationTest(unittest.TestCase):
