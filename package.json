@@ -1,0 +1,12 @@
+{
+  "name": "admin-panel-dashboard",
+  "version": "1.0.0",
+  "description": "JavaScript foundation for the Admin Panel Dashboard.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

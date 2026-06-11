@@ -1,0 +1,11 @@
+export const DEFAULT_PAGE = 1;
+export const DEFAULT_SIZE = 20;
+export const MAX_SIZE = 100;
+export const PAGE_KEY = 'page';
+export const SIZE_KEY = 'size';
+export const SORT_KEY = 'sort';
+export const ORDER_KEY = 'order';
+export const FILTER_PREFIX = 'filter_';
+export const ASC = 'asc';
+export const DESC = 'desc';
+export const OPS = new Set(['eq', 'ne', 'lt', 'lte', 'gt', 'gte', 'like', 'in']);
