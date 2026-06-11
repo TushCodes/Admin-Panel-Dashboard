@@ -1,15 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { ApiMw, LoginMw, LoginRateMw, RateStore, initMw } from '../middleware/index.js';
+import { LoginMw, LoginRateMw, RateStore, initMw } from '../middleware/index.js';
 import { UnauthorizedError } from '../utils/errorHandling.js';
-
-test('ApiMw wraps handler responses', () => {
-  const app = new ApiMw(() => ({ id: 1 }));
-  const [payload, code] = app.handle({ path: '/leads' });
-  assert.equal(code, 200);
-  assert.deepEqual(payload, { success: true, message: 'OK', data: { id: 1 } });
-});
 
 test('LoginMw requires a bearer token for protected paths', () => {
   const app = new LoginMw(() => 'ok', { token: 'secret' });
@@ -30,7 +23,10 @@ test('LoginRateMw blocks repeated login attempts', () => {
 });
 
 test('initMw composes middleware factories', () => {
-  const app = initMw(() => ({ ok: true }), [(next) => new ApiMw(next)]);
-  const [payload] = app({ path: '/' });
-  assert.deepEqual(payload.data, { ok: true });
+  class MarkerMw {
+    constructor(app) { this.app = app; }
+    handle(req) { return `${this.app(req)} marked`; }
+  }
+  const app = initMw(() => 'ok', [MarkerMw]);
+  assert.equal(app({ path: '/' }), 'ok marked');
 });

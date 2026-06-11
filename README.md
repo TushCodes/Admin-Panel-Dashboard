@@ -14,7 +14,7 @@ npm install
 npm test
 ```
 
-This repository currently uses only Node.js built-ins, so `npm install` creates the lockfile without third-party runtime packages.
+This repository currently uses Node.js built-ins for the included report-generation services, so `npm install` creates the lockfile without third-party runtime packages.
 
 ## Database connection
 
@@ -31,6 +31,7 @@ Do not commit real database URLs, passwords, or application secret keys. Keep th
 
 - `model/` contains JavaScript data model classes and schema metadata.
 - `db/connection.js` contains lazy database configuration helpers.
-- `middleware/` contains framework-neutral authentication, API response, and login rate-limit middleware.
-- `utils/` contains JSON, logging, error-handling, external API, and pagination helpers.
+- `middleware/` contains framework-neutral authentication and login rate-limit middleware.
+- `utils/` contains JSON, logging, error-handling, and pagination helpers.
+- `services/` contains MIS PDF and Excel workbook generation helpers.
 - `test/` contains Node.js test runner coverage and reusable dashboard test data.

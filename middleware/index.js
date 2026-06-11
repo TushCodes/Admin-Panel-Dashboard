@@ -1,4 +1,3 @@
-export { ApiMw } from './api.js';
 export { LoginMw } from './auth.js';
 export { LoginRateMw, RateStore, TooManyRequestsError } from './rate.js';
 
