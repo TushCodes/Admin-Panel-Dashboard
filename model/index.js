@@ -1,4 +1,9 @@
-export { Consignment } from './consignment.js';
-export { Document } from './document.js';
-export { Lead } from './lead.js';
-export { AdminUser, DashboardMetric } from './dataModel.js';
+export const prismaModels = Object.freeze({
+  consignment: 'Consignment',
+  document: 'Document',
+  lead: 'Lead',
+  adminUser: 'AdminUser',
+  dashboardMetric: 'DashboardMetric',
+});
+
+export const prismaSchemaPath = 'prisma/schema.prisma';
