@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client"
+  output   = "./generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Consignment {
+  consignmentNum String    @id @map("consignment_num") @db.VarChar(16)
+  status         String?   @db.VarChar(50)
+  pickupAddress  String?   @map("pickup_address") @db.Text
+  pickupPincode  String?   @map("pickup_pincode") @db.VarChar(20)
+  pickupTag      String?   @map("pickup_tag") @db.VarChar(100)
+  pickupDate     DateTime? @map("pickup_date") @db.Date
+  dropAddress    String?   @map("drop_address") @db.Text
+  dropPincode    String?   @map("drop_pincode") @db.VarChar(20)
+  dropTag        String?   @map("drop_tag") @db.VarChar(100)
+  dropDate       DateTime? @map("drop_date") @db.Date
+  document       Document?
+
+  @@index([pickupPincode])
+  @@index([dropPincode])
+  @@map("consignments")
+}
+
+model Document {
+  documentId  String      @id @map("document_id") @db.VarChar(64)
+  pod         String?     @db.Text
+  invoice     String?     @db.Text
+  consignment Consignment @relation(fields: [documentId], references: [consignmentNum], onDelete: Cascade)
+
+  @@map("documents")
+}
+
+model Lead {
+  id      Int     @id @default(autoincrement())
+  name    String  @db.VarChar(255)
+  email   String? @db.VarChar(255)
+  phone   String  @db.VarChar(30)
+  subject String? @db.VarChar(255)
+  message String? @db.Text
+
+  @@index([email])
+  @@index([phone])
+  @@map("leads")
+}
+
+model AdminUser {
+  id    Int    @id @default(autoincrement())
+  name  String @db.VarChar(255)
+  email String @unique @db.VarChar(255)
+  role  String @default("admin") @db.VarChar(50)
+
+  @@map("admin_users")
+}
+
+model DashboardMetric {
+  id       Int       @id @default(autoincrement())
+  name     String    @db.VarChar(255)
+  value    Decimal   @db.Decimal(18, 2)
+  period   DateTime? @db.Date
+  metadata Json      @default("{}")
+
+  @@index([name])
+  @@map("dashboard_metrics")
+}
