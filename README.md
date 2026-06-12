@@ -7,14 +7,15 @@ JavaScript-based application foundation for the Admin Panel Dashboard. The codeb
 - Node.js 20+
 - npm 10+
 
-Install dependencies and run tests:
+Install dependencies, run tests, and start the API server:
 
 ```bash
 npm install
 npm test
+npm start
 ```
 
-This repository currently uses Node.js built-ins for the included report-generation services, so `npm install` creates the lockfile without third-party runtime packages.
+The Express server starts from `server.js` and listens on `PORT` (default `3000`) and `HOST` (default `0.0.0.0`).
 
 ## Database connection
 
@@ -34,4 +35,5 @@ Do not commit real database URLs, passwords, or application secret keys. Keep th
 - `middleware/` contains framework-neutral authentication and login rate-limit middleware.
 - `utils/` contains JSON, logging, error-handling, and pagination helpers.
 - `services/` contains MIS PDF and Excel workbook generation helpers.
+- `server.js` contains a basic Express API with `/` and `/health` endpoints.
 - `test/` contains Node.js test runner coverage and reusable dashboard test data.
