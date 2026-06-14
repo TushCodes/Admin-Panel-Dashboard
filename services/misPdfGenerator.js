@@ -1,3 +1,4 @@
+import { normalizeDateOnly, normalizeTableColumns, normalizeTableRows } from '../utils/dataNormalization.js';
 const DEFAULT_TITLE = 'MIS Report';
 const DEFAULT_COLUMNS = ['Metric', 'Value'];
 
@@ -25,18 +26,11 @@ export async function saveMisPdfReport(filePath, options = {}, { writer = null }
 }
 
 function normalizeColumns(columns) {
-  if (!Array.isArray(columns) || columns.length === 0) return [...DEFAULT_COLUMNS];
-  return columns.map((column) => String(column).trim()).filter(Boolean);
+  return normalizeTableColumns(columns, DEFAULT_COLUMNS);
 }
 
 function normalizeRows(rows, columns) {
-  if (!Array.isArray(rows)) return [];
-  return rows.map((row) => {
-    if (Array.isArray(row)) {
-      return Object.fromEntries(columns.map((column, index) => [column, row[index] ?? '']));
-    }
-    return { ...row };
-  });
+  return normalizeTableRows(rows, columns);
 }
 
 function buildPdf(lines) {
@@ -79,5 +73,5 @@ function formatDateTime(value) {
 }
 
 function formatDate(value) {
-  return value.toISOString().slice(0, 10);
+  return normalizeDateOnly(value);
 }

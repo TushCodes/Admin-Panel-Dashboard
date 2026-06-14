@@ -1,3 +1,4 @@
+import { deriveTableColumns, normalizeDateOnly, normalizeTableRows } from '../utils/dataNormalization.js';
 const DEFAULT_SHEET_NAME = 'Report';
 
 const CRC_TABLE = Array.from({ length: 256 }, (_, index) => {
@@ -28,17 +29,11 @@ export async function saveExcelWorkbook(filePath, options = {}, { writer = null 
 }
 
 function normalizeColumns(columns, rows) {
-  if (Array.isArray(columns) && columns.length > 0) return columns.map((column) => String(column).trim()).filter(Boolean);
-  const firstObjectRow = Array.isArray(rows) ? rows.find((row) => row && !Array.isArray(row) && typeof row === 'object') : null;
-  return firstObjectRow ? Object.keys(firstObjectRow) : [];
+  return deriveTableColumns(columns, rows);
 }
 
 function normalizeRows(rows, columns) {
-  if (!Array.isArray(rows)) return [];
-  return rows.map((row) => {
-    if (Array.isArray(row)) return columns.map((_, index) => row[index] ?? '');
-    return columns.map((column) => row?.[column] ?? '');
-  });
+  return normalizeTableRows(rows, columns, { output: 'array' });
 }
 
 function buildWorksheetXml(columns, rows) {
@@ -55,7 +50,7 @@ function buildWorksheetXml(columns, rows) {
 
 function cellXml(value, reference) {
   if (typeof value === 'number' && Number.isFinite(value)) return `<c r="${reference}"><v>${value}</v></c>`;
-  if (value instanceof Date) return `<c r="${reference}" t="inlineStr"><is><t>${escapeXml(value.toISOString().slice(0, 10))}</t></is></c>`;
+  if (value instanceof Date) return `<c r="${reference}" t="inlineStr"><is><t>${escapeXml(normalizeDateOnly(value))}</t></is></c>`;
   return `<c r="${reference}" t="inlineStr"><is><t>${escapeXml(value ?? '')}</t></is></c>`;
 }
 
