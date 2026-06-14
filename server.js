@@ -22,8 +22,6 @@ export async function createApp({ expressModule = null, morganModule = null, log
       message: 'Admin Panel Dashboard API',
       endpoints: {
         health: '/health',
-        login: 'POST /login',
-        logout: 'POST /logout',
         consignments: '/consignments',
         leads: '/leads',
         archived: '/archived/consignments',

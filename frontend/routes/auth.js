@@ -1,14 +1,8 @@
 export const authRoutes = [
   {
-    name: 'Login',
-    method: 'POST',
-    path: '/login',
-    description: 'Validate credentials with zod and return a session token payload.',
-  },
-  {
-    name: 'Logout',
-    method: 'POST',
-    path: '/logout',
-    description: 'Provide an explicit logout endpoint for clients to clear their session.',
+    name: 'Supabase Auth UI',
+    method: 'CLIENT',
+    path: 'frontend authentication card',
+    description: 'Render Supabase Auth UI in the Vue frontend and use the Supabase client for login/logout sessions.',
   },
 ];

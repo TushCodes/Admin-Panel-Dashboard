@@ -4,11 +4,6 @@ const emptyToUndefined = (value) => value === '' ? undefined : value;
 const optionalString = (max) => z.preprocess(emptyToUndefined, z.string().trim().max(max).optional());
 const optionalDate = z.preprocess(emptyToUndefined, z.coerce.date().optional());
 
-export const loginSchema = z.object({
-  email: z.string().trim().email(),
-  password: z.string().min(1),
-});
-
 export const consignmentSchema = z.object({
   consignmentNum: z.string().trim().min(1).max(16),
   status: optionalString(50),

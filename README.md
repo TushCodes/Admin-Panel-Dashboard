@@ -56,14 +56,14 @@ Start the dummy frontend in another terminal:
 npm run frontend
 ```
 
-Open `http://127.0.0.1:5173`, keep the default `http://localhost:3000/health` URL or change it to the backend URL you want to test, and click **Check backend**. If the request fails while the backend is running, the backend likely still needs CORS headers for the frontend origin.
+Open `http://127.0.0.1:5173`, keep the default `http://localhost:3000/health` URL or change it to the backend URL you want to test, and click **Check backend**. To use login/logout, paste your Supabase project URL and public anon key into the Supabase authentication card; the frontend renders Supabase Auth UI and uses the Supabase client to sign users in and out. If a backend request fails while the backend is running, the backend likely still needs CORS headers for the frontend origin.
 
 ## Project layout
 
 - `prisma/schema.prisma` contains the Prisma data model schema.
 - `model/` contains Prisma model-name exports for code that needs stable model identifiers.
 - `db/connection.js` contains lazy Prisma Client configuration helpers that use the generated client and PostgreSQL driver adapter.
-- `middleware/` contains framework-neutral authentication and login rate-limit middleware.
+- `middleware/` contains a small framework-neutral middleware composition helper.
 - `utils/` contains JSON, logging, error-handling, and pagination helpers.
 - `services/` contains MIS PDF and Excel workbook generation helpers.
 - `server.js` contains a basic Express API with `/` and `/health` endpoints.
