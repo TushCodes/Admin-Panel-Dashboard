@@ -1,3 +1,4 @@
+import { errorPages } from './errors/error-pages.js';
 import { routes } from './routes/index.js';
 
 const { createApp, computed, ref } = Vue;
@@ -41,6 +42,6 @@ createApp({
       }
     }
 
-    return { apiUrl, checkBackend, formattedResult, loading, routes, statusBadgeClass, statusLabel };
+    return { apiUrl, checkBackend, errorPages, formattedResult, loading, routes, statusBadgeClass, statusLabel };
   },
 }).mount('#app');

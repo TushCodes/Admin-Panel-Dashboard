@@ -46,6 +46,20 @@
           <pre class="mt-5 min-h-48 overflow-auto rounded-2xl bg-slate-950 p-4 text-sm leading-6 text-emerald-100">{{ formattedResult }}</pre>
         </section>
 
+
+        <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/70 lg:col-span-2" aria-labelledby="error-pages-title">
+          <p class="text-xs font-black uppercase tracking-[0.25em] text-brand-600">Frontend error states</p>
+          <h2 id="error-pages-title" class="mt-2 text-2xl font-black">Dedicated error pages</h2>
+          <p class="mt-2 max-w-3xl text-slate-600">Preview reusable pages for common HTTP failures so backend and frontend routes can redirect users to polished recovery screens.</p>
+          <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <a v-for="errorPage in errorPages" :key="errorPage.code" :href="errorPage.href" class="group rounded-2xl border border-slate-200 bg-slate-50 p-4 transition hover:-translate-y-1 hover:border-brand-500 hover:shadow-lg hover:shadow-blue-100">
+              <span class="text-3xl font-black text-slate-900 group-hover:text-brand-600">{{ errorPage.code }}</span>
+              <span class="mt-2 block text-sm font-black text-slate-700">{{ errorPage.title }}</span>
+              <span class="mt-2 block text-xs leading-5 text-slate-500">{{ errorPage.eyebrow }}</span>
+            </a>
+          </div>
+        </section>
+
         <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/70" aria-labelledby="routes-title">
           <p class="text-xs font-black uppercase tracking-[0.25em] text-brand-600">MVP routes</p>
           <h2 id="routes-title" class="mt-2 text-2xl font-black">Available backend modules</h2>

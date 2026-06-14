@@ -1,4 +1,5 @@
 import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 
 import express from 'express';
 import morgan from 'morgan';
@@ -18,7 +19,7 @@ app.use(express.static(frontendRoot, {
 }));
 
 app.use((_req, res) => {
-  res.status(404).type('text/plain').send('Not found');
+  res.status(404).sendFile(join(frontendRoot, 'errors', '404.html'));
 });
 
 app.listen(port, host, () => {
