@@ -4,7 +4,7 @@ import test from 'node:test';
 import { DatabaseConnectionDisabledError, ensureDatabaseConnectionEnabled } from '../utils/dbError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { BadRequestError, NotFoundError, handleException } from '../utils/errorHandling.js';
-import { jsonResponse, parseJsonBody, toJson } from '../utils/json.js';
+import { APIResponse, DataNormalizer, JsonUtils, jsonResponse, parseJsonBody, toJson } from '../utils/json.js';
 import { getLogger } from '../utils/logging.js';
 
 test('parseJsonBody accepts object payloads', () => {
@@ -23,6 +23,12 @@ test('jsonResponse uses the standard envelope', () => {
 
 test('toJson serializes dates compactly', () => {
   assert.equal(toJson({ created_on: new Date('2026-06-09T00:00:00.000Z') }), '{"created_on":"2026-06-09"}');
+});
+
+test('class utility exports mirror function helpers', () => {
+  assert.deepEqual(DataNormalizer.normalizeForJson({ id: 1n }), { id: '1' });
+  assert.equal(JsonUtils.toJson({ created_on: new Date('2026-06-09T00:00:00.000Z') }), '{"created_on":"2026-06-09"}');
+  assert.deepEqual(APIResponse.success({ id: 1 }), jsonResponse({ id: 1 }));
 });
 
 test('asyncHandler forwards rejected errors to next', async () => {
