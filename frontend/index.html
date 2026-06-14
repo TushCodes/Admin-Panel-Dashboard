@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin Panel Dashboard Frontend</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero" aria-labelledby="page-title">
+        <p class="eyebrow">Admin Panel Dashboard</p>
+        <h1 id="page-title">Dummy frontend ready for CORS testing</h1>
+        <p class="lede">
+          This static page is intentionally lightweight so it can be served from a
+          different origin while the backend exposes the API.
+        </p>
+      </section>
+
+      <section class="card" aria-labelledby="api-status-title">
+        <div>
+          <p class="eyebrow">Backend connection</p>
+          <h2 id="api-status-title">API health check</h2>
+          <p>
+            Update the API URL below, then click the button to test cross-origin
+            requests against the Express backend.
+          </p>
+        </div>
+
+        <label class="field">
+          <span>Backend health URL</span>
+          <input id="apiUrl" type="url" value="http://localhost:3000/health" />
+        </label>
+
+        <button id="checkApi" type="button">Check backend</button>
+        <pre id="apiResult" class="result" aria-live="polite">Waiting for a request...</pre>
+      </section>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
