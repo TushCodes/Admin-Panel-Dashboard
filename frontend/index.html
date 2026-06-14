@@ -19,8 +19,8 @@
     <div id="app" class="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
       <header class="rounded-3xl bg-gradient-to-br from-brand-600 to-violet-600 p-8 text-white shadow-2xl shadow-blue-950/20 sm:p-12">
         <p class="text-xs font-black uppercase tracking-[0.3em] text-white/70">Admin Panel Dashboard</p>
-        <h1 class="mt-4 max-w-3xl text-4xl font-black leading-none tracking-tight sm:text-6xl">Vue MVP with Tailwind-powered API tools</h1>
-        <p class="mt-5 max-w-2xl text-lg leading-8 text-white/85">Check backend health, sign in with Supabase Auth UI, and preview the consignments, leads, and archived API routes from a lightweight Vue.js frontend.</p>
+        <h1 class="mt-4 max-w-3xl text-4xl font-black leading-none tracking-tight sm:text-6xl">Secure admin login with Tailwind-powered API tools</h1>
+        <p class="mt-5 max-w-2xl text-lg leading-8 text-white/85">Sign in with credentials stored in server environment variables, check backend health, and preview the consignments, leads, and archived API routes from a lightweight Vue.js frontend.</p>
       </header>
 
       <main class="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
@@ -47,34 +47,38 @@
         </section>
 
         <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/70" aria-labelledby="auth-title">
-          <p class="text-xs font-black uppercase tracking-[0.25em] text-brand-600">Supabase authentication</p>
-          <h2 id="auth-title" class="mt-2 text-2xl font-black">Login / logout</h2>
-          <p class="mt-2 text-slate-600">Use Supabase Auth UI for email, magic-link, and enabled social-provider sign-ins. Sessions are stored by Supabase and reused for backend requests.</p>
+          <p class="text-xs font-black uppercase tracking-[0.25em] text-brand-600">Admin authentication</p>
+          <h2 id="auth-title" class="mt-2 text-2xl font-black">Sleek login</h2>
+          <p class="mt-2 text-slate-600">Enter the admin ID and password configured on the backend. Credentials are posted to the API and are never embedded in the frontend bundle.</p>
 
-          <div class="mt-5 grid gap-3">
+          <form v-if="!session" @submit.prevent="login" class="mt-5 grid gap-3 rounded-[2rem] border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-5 shadow-inner">
             <label class="grid gap-2 text-sm font-bold text-slate-700">
-              <span>Supabase project URL</span>
-              <input v-model="supabaseUrl" type="url" placeholder="https://your-project.supabase.co" class="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none ring-brand-500 transition focus:ring-4" />
+              <span>API base URL</span>
+              <input v-model="apiBaseUrl" type="url" placeholder="http://localhost:3000" class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 outline-none ring-brand-500 transition focus:ring-4" />
             </label>
             <label class="grid gap-2 text-sm font-bold text-slate-700">
-              <span>Supabase anon key</span>
-              <input v-model="supabaseAnonKey" type="password" placeholder="Paste your public anon key" class="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none ring-brand-500 transition focus:ring-4" />
+              <span>Admin ID</span>
+              <input v-model="adminId" type="text" autocomplete="username" placeholder="Enter ADMIN_ID" class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 outline-none ring-brand-500 transition focus:ring-4" required />
             </label>
-            <button @click="configureSupabase" type="button" class="rounded-2xl bg-slate-900 px-5 py-3 font-black text-white shadow-lg shadow-slate-900/20 transition hover:bg-slate-700 focus:outline-none focus:ring-4 focus:ring-slate-200" :disabled="authLoading">
-              {{ authLoading ? 'Configuring…' : 'Load Supabase Auth UI' }}
+            <label class="grid gap-2 text-sm font-bold text-slate-700">
+              <span>Password</span>
+              <input v-model="adminPassword" type="password" autocomplete="current-password" placeholder="Enter ADMIN_PASSWORD" class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 outline-none ring-brand-500 transition focus:ring-4" required />
+            </label>
+            <button type="submit" class="rounded-2xl bg-slate-950 px-5 py-3 font-black text-white shadow-lg shadow-slate-900/20 transition hover:-translate-y-0.5 hover:bg-brand-600 focus:outline-none focus:ring-4 focus:ring-blue-200" :disabled="authLoading">
+              {{ authLoading ? 'Signing in…' : 'Login to dashboard' }}
             </button>
-          </div>
+          </form>
 
           <div class="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <p class="text-sm font-bold text-slate-700">{{ authMessage }}</p>
             <div v-if="session" class="mt-4 flex flex-col gap-3 rounded-2xl bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p class="text-xs font-black uppercase tracking-[0.2em] text-emerald-600">Signed in</p>
-                <p class="mt-1 font-black text-slate-900">{{ signedInEmail }}</p>
+                <p class="mt-1 font-black text-slate-900">{{ signedInId }}</p>
+                <p class="mt-1 text-sm text-slate-500">Session expires at {{ new Date(session.expiresAt).toLocaleString() }}</p>
               </div>
               <button @click="signOut" type="button" class="rounded-2xl bg-rose-600 px-5 py-3 font-black text-white shadow-lg shadow-rose-600/20 transition hover:bg-rose-500 focus:outline-none focus:ring-4 focus:ring-rose-200" :disabled="authLoading">Logout</button>
             </div>
-            <Auth v-else-if="supabaseConfigured" class="mt-4" :supabase-client="supabaseClient" :appearance="authAppearance" :providers="authProviders" />
           </div>
         </section>
 
