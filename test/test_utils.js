@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { DatabaseConnectionDisabledError, ensureDatabaseConnectionEnabled } from '../utils/dbError.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
 import { BadRequestError, NotFoundError, handleException } from '../utils/errorHandling.js';
 import { jsonResponse, parseJsonBody, toJson } from '../utils/json.js';
 import { getLogger } from '../utils/logging.js';
@@ -22,6 +23,21 @@ test('jsonResponse uses the standard envelope', () => {
 
 test('toJson serializes dates compactly', () => {
   assert.equal(toJson({ created_on: new Date('2026-06-09T00:00:00.000Z') }), '{"created_on":"2026-06-09"}');
+});
+
+test('asyncHandler forwards rejected errors to next', async () => {
+  const expected = new Error('boom');
+  const calls = [];
+  const handler = asyncHandler(async () => {
+    throw expected;
+  });
+
+  await handler({}, {}, (error) => calls.push(error));
+  assert.deepEqual(calls, [expected]);
+});
+
+test('asyncHandler validates handler input', () => {
+  assert.throws(() => asyncHandler(null), TypeError);
 });
 
 test('handleException maps AppError subclasses', () => {
