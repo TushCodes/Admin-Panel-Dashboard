@@ -1,5 +1,7 @@
 import { pathToFileURL } from 'node:url';
 
+import { asyncHandler, handleException } from './utils/index.js';
+
 export async function createApp({ expressModule = null, morganModule = null, loggerFormat = process.env.MORGAN_FORMAT ?? 'combined' } = {}) {
   const express = expressModule ?? (await import('express')).default;
   const morgan = morganModule ?? (await import('morgan')).default;
@@ -9,7 +11,7 @@ export async function createApp({ expressModule = null, morganModule = null, log
   app.use(morgan(loggerFormat));
   app.use(express.json());
 
-  app.get('/', (_req, res) => {
+  app.get('/', asyncHandler(async (_req, res) => {
     res.json({
       success: true,
       message: 'Admin Panel Dashboard API',
@@ -17,16 +19,16 @@ export async function createApp({ expressModule = null, morganModule = null, log
         health: '/health',
       },
     });
-  });
+  }));
 
-  app.get('/health', (_req, res) => {
+  app.get('/health', asyncHandler(async (_req, res) => {
     res.json({
       success: true,
       status: 'ok',
       uptime: process.uptime(),
       timestamp: new Date().toISOString(),
     });
-  });
+  }));
 
   app.use((req, res) => {
     res.status(404).json({
@@ -39,14 +41,8 @@ export async function createApp({ expressModule = null, morganModule = null, log
   });
 
   app.use((error, _req, res, _next) => {
-    const statusCode = Number.isInteger(error.statusCode) ? error.statusCode : 500;
-    res.status(statusCode).json({
-      success: false,
-      error: {
-        code: error.code ?? 'internal_server_error',
-        message: statusCode >= 500 ? 'An unexpected error occurred.' : error.message,
-      },
-    });
+    const [payload, statusCode] = handleException(error, { includeDebug: process.env.NODE_ENV !== 'production' });
+    res.status(statusCode).json(payload);
   });
 
   return app;

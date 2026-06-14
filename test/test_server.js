@@ -49,11 +49,11 @@ test('createApp wires basic Express routes and middleware', async () => {
   assert.equal(health?.method, 'GET');
 
   const rootResponse = createResponse();
-  root.handler({}, rootResponse);
+  await root.handler({}, rootResponse);
   assert.equal(rootResponse.payload.message, 'Admin Panel Dashboard API');
 
   const healthResponse = createResponse();
-  health.handler({}, healthResponse);
+  await health.handler({}, healthResponse);
   assert.equal(healthResponse.payload.status, 'ok');
   assert.match(healthResponse.payload.timestamp, /^\d{4}-\d{2}-\d{2}T/);
 });
