@@ -31,10 +31,17 @@ function createResponse() {
 
 test('createApp wires basic Express routes and middleware', async () => {
   const fakeExpress = createFakeExpress();
-  const app = await createApp({ expressModule: fakeExpress });
+  const loggerCalls = [];
+  const fakeMorgan = (format) => {
+    loggerCalls.push(format);
+    return 'request-logger';
+  };
+  const app = await createApp({ expressModule: fakeExpress, morganModule: fakeMorgan, loggerFormat: 'tiny' });
 
   assert.deepEqual(app.disabled, ['x-powered-by']);
-  assert.equal(app.middleware[0], 'json-parser');
+  assert.deepEqual(loggerCalls, ['tiny']);
+  assert.equal(app.middleware[0], 'request-logger');
+  assert.equal(app.middleware[1], 'json-parser');
 
   const root = app.routes.find((route) => route.path === '/');
   const health = app.routes.find((route) => route.path === '/health');
