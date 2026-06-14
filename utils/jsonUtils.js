@@ -1,0 +1,46 @@
+import { BadRequestError } from './errorHandling.js';
+import { normalizeForJson } from './dataNormalization.js';
+
+export class JsonUtils {
+  static toJson(payload) {
+    return JSON.stringify(normalizeForJson(payload));
+  }
+
+  static fromJson(rawBody) {
+    let text = rawBody;
+    if (rawBody instanceof Uint8Array || Buffer.isBuffer(rawBody)) {
+      text = Buffer.from(rawBody).toString('utf8');
+    }
+    if (typeof text !== 'string' || !text.trim()) {
+      throw new BadRequestError('Request body cannot be empty.');
+    }
+    try {
+      return JSON.parse(text);
+    } catch (error) {
+      throw new BadRequestError('Request body contains invalid JSON.', { details: { message: error.message } });
+    }
+  }
+
+  static parseJsonBody(rawBody, { requireObject = true } = {}) {
+    if (rawBody == null) throw new BadRequestError('Request body cannot be empty.');
+    const parsedBody = rawBody && typeof rawBody === 'object' && !Buffer.isBuffer(rawBody) && !(rawBody instanceof Uint8Array)
+      ? { ...rawBody }
+      : JsonUtils.fromJson(rawBody);
+    if (requireObject && (!parsedBody || typeof parsedBody !== 'object' || Array.isArray(parsedBody))) {
+      throw new BadRequestError('Request body must be a JSON object.');
+    }
+    return parsedBody;
+  }
+}
+
+export function toJson(payload) {
+  return JsonUtils.toJson(payload);
+}
+
+export function fromJson(rawBody) {
+  return JsonUtils.fromJson(rawBody);
+}
+
+export function parseJsonBody(rawBody, options = {}) {
+  return JsonUtils.parseJsonBody(rawBody, options);
+}
