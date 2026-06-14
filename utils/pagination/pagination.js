@@ -1,5 +1,6 @@
 import { BadRequestError } from '../errorHandling.js';
 import { ASC, DEFAULT_PAGE, DEFAULT_SIZE, DESC, FILTER_PREFIX, MAX_SIZE, OPS, ORDER_KEY, PAGE_KEY, SIZE_KEY, SORT_KEY } from './constants.js';
+import { normalizeDelimitedStringList } from '../dataNormalization.js';
 import { pageResponse } from './response.js';
 
 export class Page {
@@ -35,9 +36,7 @@ export function parseSort(params = {}) {
   if (!raw) return [];
   const order = String(params[ORDER_KEY] ?? ASC).toLowerCase();
   if (![ASC, DESC].includes(order)) throw new BadRequestError('order must be asc or desc');
-  const vals = Array.isArray(raw) ? raw : String(raw).split(',');
-  return vals.filter((item) => String(item).trim()).map((item) => {
-    const name = String(item).trim();
+  return normalizeDelimitedStringList(raw).map((name) => {
     const desc = name.startsWith('-') || order === DESC;
     const field = ['+', '-'].includes(name[0]) ? name.slice(1) : name;
     if (!field) throw new BadRequestError('Invalid sort field.');
@@ -78,7 +77,7 @@ function match(left, op, right) {
   if (op === 'eq') return left === right;
   if (op === 'ne') return left !== right;
   if (op === 'like') return String(left).toLowerCase().includes(String(right).toLowerCase());
-  if (op === 'in') { const vals = Array.isArray(right) ? right : String(right).split(','); return vals.map(String).includes(String(left)); }
+  if (op === 'in') return normalizeDelimitedStringList(right).includes(String(left));
   if (op === 'lt') return left < right;
   if (op === 'lte') return left <= right;
   if (op === 'gt') return left > right;
