@@ -27,7 +27,9 @@ The application reads the database URL lazily only when a Prisma Client is reque
 - `DATABASE_URL`
 - `SECRET_KEY`
 
-Do not commit real database URLs, passwords, or application secret keys. Keep those values in Render environment variables or another deployment secret store.
+Copy `.env.example` to `.env` for local development or add the same keys to Render, Supabase, or another deployment secret store. The Supabase pooled PostgreSQL URL should be assigned to `DATABASE_URL`; do not paste it directly into source files, tests, logs, or frontend code because it includes the database password.
+
+Do not commit real database URLs, passwords, JWT secrets, or application secret keys. The public Supabase anon key may be used by the browser auth client, but it should still be configured through local storage, deployment settings, or a generated runtime config instead of hard-coded in this repository.
 
 ## Prisma workflow
 
