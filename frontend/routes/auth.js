@@ -1,8 +1,8 @@
 export const authRoutes = [
   {
-    name: 'Supabase Auth UI',
-    method: 'CLIENT',
-    path: 'frontend authentication card',
-    description: 'Render Supabase Auth UI in the Vue frontend and use the Supabase client for login/logout sessions.',
+    name: 'Admin credential login',
+    method: 'POST',
+    path: '/auth/login',
+    description: 'Validate an admin ID and password against server-side ADMIN_ID and ADMIN_PASSWORD environment variables without exposing secrets to the frontend.',
   },
 ];
