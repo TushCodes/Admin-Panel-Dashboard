@@ -1,10 +1,12 @@
 import { pathToFileURL } from 'node:url';
 
-export async function createApp({ expressModule = null } = {}) {
+export async function createApp({ expressModule = null, morganModule = null, loggerFormat = process.env.MORGAN_FORMAT ?? 'combined' } = {}) {
   const express = expressModule ?? (await import('express')).default;
+  const morgan = morganModule ?? (await import('morgan')).default;
   const app = express();
 
   app.disable('x-powered-by');
+  app.use(morgan(loggerFormat));
   app.use(express.json());
 
   app.get('/', (_req, res) => {
