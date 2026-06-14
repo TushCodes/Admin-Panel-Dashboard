@@ -2,7 +2,7 @@ import { pathToFileURL } from 'node:url';
 
 import { asyncHandler, handleException } from './utils/index.js';
 
-export async function createApp({ expressModule = null, morganModule = null, loggerFormat = process.env.MORGAN_FORMAT ?? 'combined' } = {}) {
+export async function createApp({ expressModule = null, morganModule = null, loggerFormat = process.env.MORGAN_FORMAT ?? 'combined', routeOptions = {} } = {}) {
   const express = expressModule ?? (await import('express')).default;
   const morgan = morganModule ?? (await import('morgan')).default;
   const app = express();
@@ -11,12 +11,22 @@ export async function createApp({ expressModule = null, morganModule = null, log
   app.use(morgan(loggerFormat));
   app.use(express.json());
 
+  if (!expressModule) {
+    const { registerRoutes } = await import('./routes/index.js');
+    registerRoutes(app, routeOptions);
+  }
+
   app.get('/', asyncHandler(async (_req, res) => {
     res.json({
       success: true,
       message: 'Admin Panel Dashboard API',
       endpoints: {
         health: '/health',
+        login: 'POST /login',
+        logout: 'POST /logout',
+        consignments: '/consignments',
+        leads: '/leads',
+        archived: '/archived/consignments',
       },
     });
   }));

@@ -4,39 +4,66 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Admin Panel Dashboard Frontend</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: { brand: { 500: '#2563eb', 600: '#1d4ed8' } },
+          },
+        },
+      };
+    </script>
   </head>
-  <body>
-    <main class="shell">
-      <section class="hero" aria-labelledby="page-title">
-        <p class="eyebrow">Admin Panel Dashboard</p>
-        <h1 id="page-title">Dummy frontend ready for CORS testing</h1>
-        <p class="lede">
-          This static page is intentionally lightweight so it can be served from a
-          different origin while the backend exposes the API.
-        </p>
-      </section>
+  <body class="min-h-screen bg-slate-100 text-slate-900 antialiased">
+    <div id="app" class="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <header class="rounded-3xl bg-gradient-to-br from-brand-600 to-violet-600 p-8 text-white shadow-2xl shadow-blue-950/20 sm:p-12">
+        <p class="text-xs font-black uppercase tracking-[0.3em] text-white/70">Admin Panel Dashboard</p>
+        <h1 class="mt-4 max-w-3xl text-4xl font-black leading-none tracking-tight sm:text-6xl">Vue MVP with Tailwind-powered API tools</h1>
+        <p class="mt-5 max-w-2xl text-lg leading-8 text-white/85">Check backend health, prepare login/logout, and preview the consignments, leads, and archived API routes from a lightweight Vue.js frontend.</p>
+      </header>
 
-      <section class="card" aria-labelledby="api-status-title">
-        <div>
-          <p class="eyebrow">Backend connection</p>
-          <h2 id="api-status-title">API health check</h2>
-          <p>
-            Update the API URL below, then click the button to test cross-origin
-            requests against the Express backend.
-          </p>
-        </div>
+      <main class="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/70" aria-labelledby="api-status-title">
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p class="text-xs font-black uppercase tracking-[0.25em] text-brand-600">Backend connection</p>
+              <h2 id="api-status-title" class="mt-2 text-2xl font-black">API health check</h2>
+              <p class="mt-2 text-slate-600">Update the API URL, then test cross-origin requests against the Express backend.</p>
+            </div>
+            <span class="rounded-full px-3 py-1 text-sm font-bold" :class="statusBadgeClass">{{ statusLabel }}</span>
+          </div>
 
-        <label class="field">
-          <span>Backend health URL</span>
-          <input id="apiUrl" type="url" value="http://localhost:3000/health" />
-        </label>
+          <label class="mt-6 grid gap-2 text-sm font-bold text-slate-700">
+            <span>Backend health URL</span>
+            <input v-model="apiUrl" type="url" class="w-full rounded-2xl border border-slate-300 px-4 py-3 outline-none ring-brand-500 transition focus:ring-4" />
+          </label>
 
-        <button id="checkApi" type="button">Check backend</button>
-        <pre id="apiResult" class="result" aria-live="polite">Waiting for a request...</pre>
-      </section>
-    </main>
+          <button @click="checkBackend" type="button" class="mt-4 rounded-2xl bg-brand-600 px-5 py-3 font-black text-white shadow-lg shadow-blue-600/25 transition hover:bg-brand-500 focus:outline-none focus:ring-4 focus:ring-blue-200" :disabled="loading">
+            {{ loading ? 'Checking…' : 'Check backend' }}
+          </button>
 
+          <pre class="mt-5 min-h-48 overflow-auto rounded-2xl bg-slate-950 p-4 text-sm leading-6 text-emerald-100">{{ formattedResult }}</pre>
+        </section>
+
+        <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/70" aria-labelledby="routes-title">
+          <p class="text-xs font-black uppercase tracking-[0.25em] text-brand-600">MVP routes</p>
+          <h2 id="routes-title" class="mt-2 text-2xl font-black">Available backend modules</h2>
+          <div class="mt-5 grid gap-3">
+            <article v-for="route in routes" :key="route.path" class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="font-black">{{ route.name }}</h3>
+                <code class="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-700 shadow-sm">{{ route.method }}</code>
+              </div>
+              <p class="mt-2 text-sm text-slate-600">{{ route.description }}</p>
+              <code class="mt-3 block rounded-xl bg-white px-3 py-2 text-sm font-bold text-brand-600">{{ route.path }}</code>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script type="module" src="./app.js"></script>
   </body>
 </html>
