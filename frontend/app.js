@@ -1,3 +1,5 @@
+import { routes } from './routes/index.js';
+
 const { createApp, computed, ref } = Vue;
 
 createApp({
@@ -6,14 +8,6 @@ createApp({
     const loading = ref(false);
     const result = ref({ message: 'Waiting for a request...' });
     const status = ref('idle');
-
-    const routes = [
-      { name: 'Login', method: 'POST', path: '/login', description: 'Validate credentials with zod and return a session token payload.' },
-      { name: 'Logout', method: 'POST', path: '/logout', description: 'Provide an explicit logout endpoint for clients to clear their session.' },
-      { name: 'Consignments', method: 'GET/POST/PATCH', path: '/consignments', description: 'List, create, read, and update consignment records.' },
-      { name: 'Leads', method: 'GET/POST/PATCH', path: '/leads', description: 'Capture and manage lead details submitted by customers.' },
-      { name: 'Archived', method: 'GET/POST', path: '/archived/consignments', description: 'List archived consignments and archive or restore records.' },
-    ];
 
     const formattedResult = computed(() => JSON.stringify(result.value, null, 2));
     const statusLabel = computed(() => ({ idle: 'Ready', loading: 'Checking', ok: 'Online', error: 'Offline' }[status.value]));
