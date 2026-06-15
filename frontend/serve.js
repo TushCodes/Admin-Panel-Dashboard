@@ -18,8 +18,12 @@ app.use(express.static(frontendRoot, {
   index: 'index.html',
 }));
 
-app.use((_req, res) => {
-  res.status(404).sendFile(join(frontendRoot, 'errors', '404.html'));
+app.use((req, res) => {
+  if (req.accepts('html') && !req.path.includes('.')) {
+    return res.sendFile(join(frontendRoot, 'index.html'));
+  }
+
+  return res.status(404).sendFile(join(frontendRoot, 'errors', '404.html'));
 });
 
 app.listen(port, host, () => {
