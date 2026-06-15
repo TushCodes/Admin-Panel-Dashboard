@@ -49,7 +49,7 @@ test('createApp wires basic Express routes and middleware', async () => {
 
   const root = app.routes.find((route) => route.path === '/');
   const health = app.routes.find((route) => route.path === '/health');
-  const login = app.routes.find((route) => route.path === '/auth/login');
+  const login = app.routes.find((route) => route.path === '/api/v1/auth/login');
   assert.equal(root?.method, 'GET');
   assert.equal(health?.method, 'GET');
   assert.equal(login?.method, 'POST');
@@ -57,6 +57,13 @@ test('createApp wires basic Express routes and middleware', async () => {
   const rootResponse = createResponse();
   await root.handler({}, rootResponse);
   assert.equal(rootResponse.payload.message, 'Admin Panel Dashboard API');
+  assert.deepEqual(rootResponse.payload.endpoints, {
+    health: '/health',
+    login: '/api/v1/auth/login',
+    consignments: '/api/v1/consignments',
+    leads: '/api/v1/leads',
+    archived: '/api/v1/archived/consignments',
+  });
 
   const healthResponse = createResponse();
   await health.handler({}, healthResponse);
@@ -73,7 +80,7 @@ test('admin login validates environment credentials', async () => {
   try {
     const fakeExpress = createFakeExpress();
     const app = await createApp({ expressModule: fakeExpress, morganModule: () => 'request-logger' });
-    const login = app.routes.find((route) => route.path === '/auth/login');
+    const login = app.routes.find((route) => route.path === '/api/v1/auth/login');
 
     const failedResponse = createResponse();
     await login.handler({ body: { id: 'owner', password: 'wrong' } }, failedResponse);
@@ -92,4 +99,23 @@ test('admin login validates environment credentials', async () => {
     if (originalPassword === undefined) delete process.env.ADMIN_PASSWORD;
     else process.env.ADMIN_PASSWORD = originalPassword;
   }
+});
+
+test('resource routes are mounted under the versioned API prefix', async () => {
+  const { registerRoutes } = await import('../routes/index.js');
+  const mounted = [];
+  const app = { use(path, router) { mounted.push({ path, router }); } };
+  const options = {
+    consignmentRoutes: 'consignment-router',
+    leadRoutes: 'lead-router',
+    archivedRoutes: 'archived-router',
+  };
+
+  registerRoutes(app, options);
+
+  assert.deepEqual(mounted, [
+    { path: '/api/v1/consignments', router: 'consignment-router' },
+    { path: '/api/v1/leads', router: 'lead-router' },
+    { path: '/api/v1/archived', router: 'archived-router' },
+  ]);
 });

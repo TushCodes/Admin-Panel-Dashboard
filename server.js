@@ -4,6 +4,7 @@ import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
 import { asyncHandler, handleException } from './utils/index.js';
 
 const ADMIN_TOKEN_TTL_SECONDS = 60 * 60 * 8;
+const API_PREFIX = '/api/v1';
 
 function getAllowedOrigins() {
   return (process.env.CORS_ORIGIN ?? process.env.FRONTEND_ORIGIN ?? 'http://localhost:5173,http://127.0.0.1:5173')
@@ -51,7 +52,7 @@ export async function createApp({ expressModule = null, morganModule = null, log
       res.setHeader('Access-Control-Allow-Origin', origin);
       res.setHeader('Vary', 'Origin');
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
     }
     if (req.method === 'OPTIONS') return res.sendStatus(204);
     return next();
@@ -68,15 +69,15 @@ export async function createApp({ expressModule = null, morganModule = null, log
       message: 'Admin Panel Dashboard API',
       endpoints: {
         health: '/health',
-        login: '/auth/login',
-        consignments: '/consignments',
-        leads: '/leads',
-        archived: '/archived/consignments',
+        login: `${API_PREFIX}/auth/login`,
+        consignments: `${API_PREFIX}/consignments`,
+        leads: `${API_PREFIX}/leads`,
+        archived: `${API_PREFIX}/archived/consignments`,
       },
     });
   }));
 
-  app.post('/auth/login', asyncHandler(async (req, res) => {
+  app.post(`${API_PREFIX}/auth/login`, asyncHandler(async (req, res) => {
     const adminId = process.env.ADMIN_ID;
     const adminPassword = process.env.ADMIN_PASSWORD;
     const submittedId = String(req.body?.id ?? '').trim();
