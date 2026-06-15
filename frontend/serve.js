@@ -1,10 +1,13 @@
+import { existsSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { join } from 'node:path';
 
 import express from 'express';
 import morgan from 'morgan';
 
-const frontendRoot = fileURLToPath(new URL('.', import.meta.url));
+const frontendSourceRoot = fileURLToPath(new URL('.', import.meta.url));
+const frontendDistRoot = join(dirname(frontendSourceRoot), 'frontend', 'dist');
+const frontendRoot = existsSync(frontendDistRoot) ? frontendDistRoot : frontendSourceRoot;
 const port = process.env.FRONTEND_PORT ?? 5173;
 const host = process.env.FRONTEND_HOST ?? '127.0.0.1';
 const loggerFormat = process.env.MORGAN_FORMAT ?? 'combined';

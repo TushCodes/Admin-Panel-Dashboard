@@ -1,16 +1,37 @@
 import { createApp, ref } from 'vue';
 
+const loginStatusClass = '-mt-2 text-center font-bold text-[#c8f5a0]';
+
 const LoginPage = {
   setup() {
-    const username = ref('admin');
-    const password = ref('password');
+    const username = ref('');
+    const password = ref('');
     const statusMessage = ref('');
 
-    function handleSubmit() {
-      statusMessage.value = 'Ready to sign in with admin credentials.';
+    async function handleSubmit() {
+      if (!username.value || !password.value) {
+        statusMessage.value = 'Enter both a username and password to continue.';
+        return;
+      }
+
+      statusMessage.value = 'Signing in…';
+
+      try {
+        const response = await fetch('/api/v1/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: username.value.trim(), password: password.value }),
+        });
+        const payload = await response.json().catch(() => ({}));
+        statusMessage.value = response.ok
+          ? (payload.message ?? 'Login successful')
+          : (payload.message ?? payload.error?.message ?? 'Invalid username or password');
+      } catch (_error) {
+        statusMessage.value = 'Unable to reach the login API. Please try again.';
+      }
     }
 
-    return { username, password, statusMessage, handleSubmit };
+    return { handleSubmit, loginStatusClass, password, statusMessage, username };
   },
   template: `
     <main class="min-h-screen bg-[#071c20] bg-[radial-gradient(circle_at_12%_24%,rgba(40,130,70,0.2),transparent_28%),linear-gradient(115deg,#0f2f1f_0%,#071a22_48%,#0a2328_100%)] px-3.5 py-4 text-[#f6fbfb] sm:px-6 sm:pb-3.5" aria-labelledby="login-title">
@@ -31,19 +52,19 @@ const LoginPage = {
             <p class="m-0 mt-2.5 text-[clamp(1.05rem,2vw,1.32rem)] font-bold tracking-[0.025em] text-[rgba(226,235,231,0.78)]">Gram SCS IT Department</p>
           </header>
 
-          <form class="grid gap-7 px-6 py-10 sm:px-12 sm:pb-[52px] sm:pt-11" @submit.prevent="handleSubmit">
+          <form class="grid gap-7 px-6 py-10 sm:px-12 sm:pb-[52px] sm:pt-11" action="/api/v1/auth/login" method="post" @submit.prevent="handleSubmit">
             <label class="grid gap-[9px]" for="admin-username">
               <span class="text-[1.22rem] font-black uppercase text-[rgba(221,235,230,0.82)]">Username</span>
-              <input class="min-h-16 w-full rounded-[17px] border-0 bg-[#e7eefb] px-[25px] py-[18px] text-[1.45rem] tracking-[0.03em] text-[#050608] outline outline-[3px] outline-transparent focus:outline-[rgba(165,238,96,0.55)] sm:min-h-[76px]" id="admin-username" v-model="username" name="username" autocomplete="username" />
+              <input class="min-h-16 w-full rounded-[17px] border-0 bg-[#e7eefb] px-[25px] py-[18px] text-[1.45rem] tracking-[0.03em] text-[#050608] outline outline-[3px] outline-transparent focus:outline-[rgba(165,238,96,0.55)] sm:min-h-[76px]" id="admin-username" v-model="username" name="username" type="text" placeholder="Enter username" autocomplete="username" required />
             </label>
 
             <label class="grid gap-[9px]" for="admin-password">
               <span class="text-[1.22rem] font-black uppercase text-[rgba(221,235,230,0.82)]">Password</span>
-              <input class="min-h-16 w-full rounded-[17px] border-0 bg-[#e7eefb] px-[25px] py-[18px] text-[1.45rem] tracking-[0.03em] text-[#050608] outline outline-[3px] outline-transparent focus:outline-[rgba(165,238,96,0.55)] sm:min-h-[76px]" id="admin-password" v-model="password" name="password" type="password" autocomplete="current-password" />
+              <input class="min-h-16 w-full rounded-[17px] border-0 bg-[#e7eefb] px-[25px] py-[18px] text-[1.45rem] tracking-[0.03em] text-[#050608] outline outline-[3px] outline-transparent focus:outline-[rgba(165,238,96,0.55)] sm:min-h-[76px]" id="admin-password" v-model="password" name="password" type="password" placeholder="Enter password" autocomplete="current-password" required />
             </label>
 
             <button class="mt-2.5 min-h-16 cursor-pointer rounded-[17px] border-0 bg-[linear-gradient(100deg,#8bd938,#b8ed74)] text-[1.45rem] font-black tracking-[0.01em] text-[#0d1708] shadow-[0_18px_34px_rgba(116,212,59,0.18)] hover:brightness-105 focus-visible:brightness-105 sm:min-h-[78px]" type="submit">Sign In</button>
-            <p v-if="statusMessage" class="-mt-2 text-center font-bold text-[#c8f5a0]" role="status">{{ statusMessage }}</p>
+            <p v-if="statusMessage" :class="loginStatusClass" role="status">{{ statusMessage }}</p>
           </form>
         </section>
       </div>
@@ -61,7 +82,7 @@ const HomePage = {
 };
 
 const App = {
-  components: { LoginPage, HomePage },
+  components: { HomePage, LoginPage },
   computed: {
     isLoginRoute() {
       return window.location.pathname.replace(/\/$/, '') === '/auth/login';

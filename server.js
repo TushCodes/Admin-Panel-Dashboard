@@ -1,10 +1,15 @@
-import { pathToFileURL } from 'node:url';
 import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
+import { existsSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { asyncHandler, handleException } from './utils/index.js';
 
 const ADMIN_TOKEN_TTL_SECONDS = 60 * 60 * 8;
 const API_PREFIX = '/api/v1';
+const frontendSourceRoot = join(dirname(fileURLToPath(import.meta.url)), 'frontend');
+const frontendDistRoot = join(frontendSourceRoot, 'dist');
+const frontendRoot = existsSync(frontendDistRoot) ? frontendDistRoot : frontendSourceRoot;
 
 function getAllowedOrigins() {
   return (process.env.CORS_ORIGIN ?? process.env.FRONTEND_ORIGIN ?? 'http://localhost:5173,http://127.0.0.1:5173')
@@ -24,6 +29,78 @@ function adminPasswordMatches(inputPassword, configuredPassword) {
     : createHash('sha256').update(expected).digest();
 
   return inputHash.length === expectedHash.length && timingSafeEqual(inputHash, expectedHash);
+}
+
+
+function getSupabaseConfig() {
+  const url = process.env.SUPABASE_URL;
+  const anonKey = process.env.SUPABASE_ANON_KEY;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_KEY ?? anonKey;
+  return { url, anonKey, serviceKey };
+}
+
+function getSupabaseAdminEmail(username) {
+  const configuredUsername = process.env.SUPABASE_ADMIN_USERNAME ?? 'admin';
+  const configuredEmail = process.env.SUPABASE_ADMIN_EMAIL ?? `${configuredUsername}@${process.env.SUPABASE_ADMIN_EMAIL_DOMAIN ?? 'gramscs.com'}`;
+  return username === configuredUsername ? configuredEmail : null;
+}
+
+async function supabaseJsonRequest({ url, key, path, options = {}, fetchImpl = globalThis.fetch }) {
+  if (typeof fetchImpl !== 'function') {
+    throw new Error('Fetch API is not available for Supabase authentication requests.');
+  }
+
+  const response = await fetchImpl(`${url}${path}`, {
+    ...options,
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+      ...(options.headers ?? {}),
+    },
+  });
+  const payload = await response.json().catch(() => null);
+  return { response, payload };
+}
+
+async function findSupabaseAdminProfile(username, { fetchImpl = globalThis.fetch } = {}) {
+  const { url, serviceKey } = getSupabaseConfig();
+  if (!url || !serviceKey) return { configurationError: true };
+
+  const query = new URLSearchParams({
+    select: 'email,role',
+    username: `eq.${username}`,
+    limit: '1',
+  });
+  const { response, payload } = await supabaseJsonRequest({
+    url,
+    key: serviceKey,
+    path: `/rest/v1/profiles?${query.toString()}`,
+    options: { headers: { Accept: 'application/vnd.pgrst.object+json' } },
+    fetchImpl,
+  });
+
+  if (!response.ok) return { profileError: payload ?? true };
+  return { profile: payload };
+}
+
+async function signInSupabasePassword(email, password, { fetchImpl = globalThis.fetch } = {}) {
+  const { url, anonKey } = getSupabaseConfig();
+  if (!url || !anonKey) return { configurationError: true };
+
+  const { response, payload } = await supabaseJsonRequest({
+    url,
+    key: anonKey,
+    path: '/auth/v1/token?grant_type=password',
+    options: {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    },
+    fetchImpl,
+  });
+
+  if (!response.ok) return { error: payload ?? true };
+  return { data: { user: payload?.user, session: payload } };
 }
 
 function createAdminSessionToken(adminId) {
@@ -58,6 +135,12 @@ export async function createApp({ expressModule = null, morganModule = null, log
     return next();
   });
 
+  if (typeof express.static === 'function' && existsSync(frontendRoot)) {
+    app.use('/assets', express.static(join(frontendRoot, 'assets')));
+    app.use(express.static(frontendRoot, { index: false }));
+    app.get('/auth/login', (_req, res) => res.sendFile(join(frontendRoot, 'index.html')));
+  }
+
   if (!expressModule) {
     const { registerRoutes } = await import('./routes/index.js');
     registerRoutes(app, routeOptions);
@@ -78,39 +161,65 @@ export async function createApp({ expressModule = null, morganModule = null, log
   }));
 
   app.post(`${API_PREFIX}/auth/login`, asyncHandler(async (req, res) => {
-    const adminId = process.env.ADMIN_ID;
-    const adminPassword = process.env.ADMIN_PASSWORD;
-    const submittedId = String(req.body?.id ?? '').trim();
-    const submittedPassword = String(req.body?.password ?? '');
+    const username = String(req.body?.username ?? req.body?.id ?? '').trim();
+    const password = String(req.body?.password ?? '');
+    const fetchImpl = routeOptions.fetchImpl ?? globalThis.fetch;
 
-    if (!adminId || !adminPassword) {
-      return res.status(503).json({
-        success: false,
-        error: {
-          code: 'admin_auth_not_configured',
-          message: 'Admin login is not configured. Set ADMIN_ID and ADMIN_PASSWORD on the server.',
-        },
+    if (!username || !password) {
+      return res.status(400).json({ message: 'Username and password are required' });
+    }
+
+    const { profile, profileError, configurationError: profileConfigurationError } = await findSupabaseAdminProfile(username, { fetchImpl });
+    if (profileConfigurationError) {
+      const adminId = process.env.ADMIN_ID;
+      const adminPassword = process.env.ADMIN_PASSWORD;
+      if (!adminId || !adminPassword) {
+        return res.status(503).json({
+          success: false,
+          error: {
+            code: 'admin_auth_not_configured',
+            message: 'Admin login is not configured. Set Supabase auth variables or ADMIN_ID and ADMIN_PASSWORD on the server.',
+          },
+        });
+      }
+
+      const idMatches = username === adminId;
+      const passwordMatches = adminPasswordMatches(password, adminPassword);
+      if (!idMatches || !passwordMatches) {
+        return res.status(401).json({ message: 'Invalid username or password' });
+      }
+
+      const session = createAdminSessionToken(adminId);
+      return res.json({
+        message: 'Login successful',
+        user: { id: adminId, username: adminId, role: 'admin' },
+        session,
       });
     }
 
-    const idMatches = submittedId === adminId;
-    const passwordMatches = adminPasswordMatches(submittedPassword, adminPassword);
-    if (!idMatches || !passwordMatches) {
-      return res.status(401).json({
-        success: false,
-        error: {
-          code: 'invalid_admin_credentials',
-          message: 'Invalid admin ID or password.',
-        },
-      });
+    const fallbackEmail = getSupabaseAdminEmail(username);
+    if ((profileError || !profile) && !fallbackEmail) {
+      return res.status(401).json({ message: 'Invalid username or password' });
     }
 
-    const session = createAdminSessionToken(adminId);
+    if (profile && profile.role !== 'admin') {
+      return res.status(403).json({ message: 'Not allowed' });
+    }
+
+    const loginEmail = profile?.email ?? fallbackEmail;
+    const { data, error, configurationError: signInConfigurationError } = await signInSupabasePassword(loginEmail, password, { fetchImpl });
+    if (signInConfigurationError) {
+      return res.status(503).json({ message: 'Supabase authentication is not configured' });
+    }
+
+    if (error) {
+      return res.status(401).json({ message: 'Invalid username or password' });
+    }
+
     return res.json({
-      success: true,
-      message: 'Admin login successful.',
-      user: { id: adminId },
-      session,
+      message: 'Login successful',
+      user: data.user,
+      session: data.session,
     });
   }));
 
