@@ -7,9 +7,7 @@ import { asyncHandler, handleException } from './utils/index.js';
 
 const ADMIN_TOKEN_TTL_SECONDS = 60 * 60 * 8;
 const API_PREFIX = '/api/v1';
-const frontendSourceRoot = join(dirname(fileURLToPath(import.meta.url)), 'frontend');
-const frontendDistRoot = join(frontendSourceRoot, 'dist');
-const frontendRoot = existsSync(frontendDistRoot) ? frontendDistRoot : frontendSourceRoot;
+const frontendRoot = join(dirname(fileURLToPath(import.meta.url)), 'frontend');
 
 function getAllowedOrigins() {
   return (process.env.CORS_ORIGIN ?? process.env.FRONTEND_ORIGIN ?? 'http://localhost:5173,http://127.0.0.1:5173')
@@ -37,12 +35,6 @@ function getSupabaseConfig() {
   const anonKey = process.env.SUPABASE_ANON_KEY;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_KEY ?? anonKey;
   return { url, anonKey, serviceKey };
-}
-
-function getSupabaseAdminEmail(username) {
-  const configuredUsername = process.env.SUPABASE_ADMIN_USERNAME ?? 'admin';
-  const configuredEmail = process.env.SUPABASE_ADMIN_EMAIL ?? `${configuredUsername}@${process.env.SUPABASE_ADMIN_EMAIL_DOMAIN ?? 'gramscs.com'}`;
-  return username === configuredUsername ? configuredEmail : null;
 }
 
 async function supabaseJsonRequest({ url, key, path, options = {}, fetchImpl = globalThis.fetch }) {
@@ -197,17 +189,15 @@ export async function createApp({ expressModule = null, morganModule = null, log
       });
     }
 
-    const fallbackEmail = getSupabaseAdminEmail(username);
-    if ((profileError || !profile) && !fallbackEmail) {
+    if (profileError || !profile) {
       return res.status(401).json({ message: 'Invalid username or password' });
     }
 
-    if (profile && profile.role !== 'admin') {
+    if (profile.role !== 'admin') {
       return res.status(403).json({ message: 'Not allowed' });
     }
 
-    const loginEmail = profile?.email ?? fallbackEmail;
-    const { data, error, configurationError: signInConfigurationError } = await signInSupabasePassword(loginEmail, password, { fetchImpl });
+    const { data, error, configurationError: signInConfigurationError } = await signInSupabasePassword(profile.email, password, { fetchImpl });
     if (signInConfigurationError) {
       return res.status(503).json({ message: 'Supabase authentication is not configured' });
     }

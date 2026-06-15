@@ -166,64 +166,6 @@ test('admin login authenticates admin profiles through Supabase', async () => {
 });
 
 
-test('admin login maps configured username to Supabase auth email', async () => {
-  const originalUrl = process.env.SUPABASE_URL;
-  const originalAnonKey = process.env.SUPABASE_ANON_KEY;
-  const originalServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const originalAdminUsername = process.env.SUPABASE_ADMIN_USERNAME;
-  const originalAdminEmail = process.env.SUPABASE_ADMIN_EMAIL;
-  process.env.SUPABASE_URL = 'https://example.supabase.co';
-  process.env.SUPABASE_ANON_KEY = 'anon-key';
-  process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-key';
-  process.env.SUPABASE_ADMIN_USERNAME = 'admin';
-  process.env.SUPABASE_ADMIN_EMAIL = 'admin@gramscs.com';
-
-  const fetchCalls = [];
-  const fetchImpl = async (url, options) => {
-    fetchCalls.push({ url, options });
-    if (url.includes('/rest/v1/profiles')) {
-      return {
-        ok: false,
-        json: async () => ({ code: 'PGRST116', message: 'No profile found' }),
-      };
-    }
-    if (url.includes('/auth/v1/token')) {
-      return {
-        ok: true,
-        json: async () => ({ access_token: 'token', user: { id: 'user-1', email: 'admin@gramscs.com' } }),
-      };
-    }
-    throw new Error(`Unexpected fetch URL: ${url}`);
-  };
-
-  try {
-    const fakeExpress = createFakeExpress();
-    const app = await createApp({ expressModule: fakeExpress, morganModule: () => 'request-logger', routeOptions: { fetchImpl } });
-    const login = app.routes.find((route) => route.path === '/api/v1/auth/login');
-
-    const response = createResponse();
-    await login.handler({ body: { username: 'admin', password: 'adminpass' } }, response);
-
-    assert.equal(response.statusCode, 200);
-    assert.equal(response.payload.message, 'Login successful');
-    assert.equal(response.payload.user.email, 'admin@gramscs.com');
-    assert.match(fetchCalls[1].options.body, /"email":"admin@gramscs.com"/);
-    assert.match(fetchCalls[1].options.body, /"password":"adminpass"/);
-  } finally {
-    if (originalUrl === undefined) delete process.env.SUPABASE_URL;
-    else process.env.SUPABASE_URL = originalUrl;
-    if (originalAnonKey === undefined) delete process.env.SUPABASE_ANON_KEY;
-    else process.env.SUPABASE_ANON_KEY = originalAnonKey;
-    if (originalServiceRoleKey === undefined) delete process.env.SUPABASE_SERVICE_ROLE_KEY;
-    else process.env.SUPABASE_SERVICE_ROLE_KEY = originalServiceRoleKey;
-    if (originalAdminUsername === undefined) delete process.env.SUPABASE_ADMIN_USERNAME;
-    else process.env.SUPABASE_ADMIN_USERNAME = originalAdminUsername;
-    if (originalAdminEmail === undefined) delete process.env.SUPABASE_ADMIN_EMAIL;
-    else process.env.SUPABASE_ADMIN_EMAIL = originalAdminEmail;
-  }
-});
-
-
 test('resource routes are mounted under the versioned API prefix', async () => {
   const { registerRoutes } = await import('../routes/index.js');
   const mounted = [];
