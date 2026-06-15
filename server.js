@@ -131,6 +131,7 @@ export async function createApp({ expressModule = null, morganModule = null, log
     app.use('/assets', express.static(join(frontendRoot, 'assets')));
     app.use(express.static(frontendRoot, { index: false }));
     app.get('/auth/login', (_req, res) => res.sendFile(join(frontendRoot, 'index.html')));
+    app.get(`${API_PREFIX}/admin`, (_req, res) => res.sendFile(join(frontendRoot, 'index.html')));
   }
 
   if (!expressModule) {
