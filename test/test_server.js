@@ -74,8 +74,14 @@ test('createApp wires basic Express routes and middleware', async () => {
 test('admin login validates environment credentials', async () => {
   const originalId = process.env.ADMIN_ID;
   const originalPassword = process.env.ADMIN_PASSWORD;
+  const originalSupabaseUrl = process.env.SUPABASE_URL;
+  const originalSupabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+  const originalSupabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   process.env.ADMIN_ID = 'owner';
   process.env.ADMIN_PASSWORD = 'secret-pass';
+  delete process.env.SUPABASE_URL;
+  delete process.env.SUPABASE_ANON_KEY;
+  delete process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   try {
     const fakeExpress = createFakeExpress();
@@ -83,23 +89,82 @@ test('admin login validates environment credentials', async () => {
     const login = app.routes.find((route) => route.path === '/api/v1/auth/login');
 
     const failedResponse = createResponse();
-    await login.handler({ body: { id: 'owner', password: 'wrong' } }, failedResponse);
+    await login.handler({ body: { username: 'owner', password: 'wrong' } }, failedResponse);
     assert.equal(failedResponse.statusCode, 401);
-    assert.equal(failedResponse.payload.error.code, 'invalid_admin_credentials');
+    assert.equal(failedResponse.payload.message, 'Invalid username or password');
 
     const successfulResponse = createResponse();
-    await login.handler({ body: { id: 'owner', password: 'secret-pass' } }, successfulResponse);
+    await login.handler({ body: { username: 'owner', password: 'secret-pass' } }, successfulResponse);
     assert.equal(successfulResponse.statusCode, 200);
-    assert.equal(successfulResponse.payload.success, true);
+    assert.equal(successfulResponse.payload.message, 'Login successful');
     assert.equal(successfulResponse.payload.user.id, 'owner');
+    assert.equal(successfulResponse.payload.user.role, 'admin');
     assert.match(successfulResponse.payload.session.token, /^[^.]+\.[a-f0-9]{64}$/);
   } finally {
     if (originalId === undefined) delete process.env.ADMIN_ID;
     else process.env.ADMIN_ID = originalId;
     if (originalPassword === undefined) delete process.env.ADMIN_PASSWORD;
     else process.env.ADMIN_PASSWORD = originalPassword;
+    if (originalSupabaseUrl === undefined) delete process.env.SUPABASE_URL;
+    else process.env.SUPABASE_URL = originalSupabaseUrl;
+    if (originalSupabaseAnonKey === undefined) delete process.env.SUPABASE_ANON_KEY;
+    else process.env.SUPABASE_ANON_KEY = originalSupabaseAnonKey;
+    if (originalSupabaseServiceRoleKey === undefined) delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    else process.env.SUPABASE_SERVICE_ROLE_KEY = originalSupabaseServiceRoleKey;
   }
 });
+
+test('admin login authenticates admin profiles through Supabase', async () => {
+  const originalUrl = process.env.SUPABASE_URL;
+  const originalAnonKey = process.env.SUPABASE_ANON_KEY;
+  const originalServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  process.env.SUPABASE_URL = 'https://example.supabase.co';
+  process.env.SUPABASE_ANON_KEY = 'anon-key';
+  process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-key';
+
+  const fetchCalls = [];
+  const fetchImpl = async (url, options) => {
+    fetchCalls.push({ url, options });
+    if (url.includes('/rest/v1/profiles')) {
+      return {
+        ok: true,
+        json: async () => ({ email: 'admin@example.com', role: 'admin' }),
+      };
+    }
+    if (url.includes('/auth/v1/token')) {
+      return {
+        ok: true,
+        json: async () => ({ access_token: 'token', user: { id: 'user-1', email: 'admin@example.com' } }),
+      };
+    }
+    throw new Error(`Unexpected fetch URL: ${url}`);
+  };
+
+  try {
+    const fakeExpress = createFakeExpress();
+    const app = await createApp({ expressModule: fakeExpress, morganModule: () => 'request-logger', routeOptions: { fetchImpl } });
+    const login = app.routes.find((route) => route.path === '/api/v1/auth/login');
+
+    const response = createResponse();
+    await login.handler({ body: { username: 'admin', password: 'secret-pass' } }, response);
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.payload.message, 'Login successful');
+    assert.deepEqual(response.payload.user, { id: 'user-1', email: 'admin@example.com' });
+    assert.equal(response.payload.session.access_token, 'token');
+    assert.equal(fetchCalls[0].options.headers.Authorization, 'Bearer service-key');
+    assert.equal(fetchCalls[1].options.headers.Authorization, 'Bearer anon-key');
+    assert.match(fetchCalls[1].options.body, /"password":"secret-pass"/);
+  } finally {
+    if (originalUrl === undefined) delete process.env.SUPABASE_URL;
+    else process.env.SUPABASE_URL = originalUrl;
+    if (originalAnonKey === undefined) delete process.env.SUPABASE_ANON_KEY;
+    else process.env.SUPABASE_ANON_KEY = originalAnonKey;
+    if (originalServiceRoleKey === undefined) delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    else process.env.SUPABASE_SERVICE_ROLE_KEY = originalServiceRoleKey;
+  }
+});
+
 
 test('resource routes are mounted under the versioned API prefix', async () => {
   const { registerRoutes } = await import('../routes/index.js');
