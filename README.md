@@ -42,6 +42,18 @@ Do not commit real database URLs, passwords, JWT secrets, or application secret 
 - `npm run prisma:migrate:deploy` applies committed Prisma migrations in deployment environments.
 
 
+
+## API route naming
+
+Versioned application API routes use the `/api/v1` prefix so clients can distinguish stable resource endpoints from server utility endpoints. The routes selected for `/api/v1` are the admin login and business-resource routes because they represent application behavior that may need future versioning:
+
+- `POST /api/v1/auth/login`
+- `GET|POST|PATCH /api/v1/consignments` and `GET|PATCH /api/v1/consignments/:consignmentNum`
+- `GET|POST|PATCH /api/v1/leads` and `GET|PATCH /api/v1/leads/:id`
+- `GET|POST /api/v1/archived/consignments` plus archive/restore sub-routes
+
+The root discovery route `/` and operational health route `/health` are intentionally not versioned because they are infrastructure/status endpoints rather than business API resources.
+
 ## Dummy frontend
 
 A lightweight static frontend lives in `frontend/`. It can be served on its own origin for CORS testing while the Express API runs separately.
@@ -68,6 +80,6 @@ Open `http://127.0.0.1:5173`, keep the default `http://localhost:3000/health` UR
 - `middleware/` contains a small framework-neutral middleware composition helper.
 - `utils/` contains JSON, logging, error-handling, and pagination helpers.
 - `services/` contains MIS PDF and Excel workbook generation helpers.
-- `server.js` contains a basic Express API with `/` and `/health` endpoints.
+- `server.js` contains a basic Express API with `/` and `/health` status endpoints, while resource and authentication routes are mounted under `/api/v1`.
 - `frontend/` contains a dummy static page and tiny Node.js static file server for CORS testing.
 - `test/` contains Node.js test runner coverage and reusable dashboard test data.
