@@ -114,6 +114,56 @@ test('admin login validates environment credentials', async () => {
   }
 });
 
+
+test('admin login falls back to environment credentials when Supabase profile lookup misses', async () => {
+  const originalId = process.env.ADMIN_ID;
+  const originalPassword = process.env.ADMIN_PASSWORD;
+  const originalUrl = process.env.SUPABASE_URL;
+  const originalAnonKey = process.env.SUPABASE_ANON_KEY;
+  const originalServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  process.env.ADMIN_ID = 'admin';
+  process.env.ADMIN_PASSWORD = 'adminpass';
+  process.env.SUPABASE_URL = 'https://example.supabase.co';
+  process.env.SUPABASE_ANON_KEY = 'anon-key';
+  process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-key';
+
+  const fetchCalls = [];
+  const fetchImpl = async (url, options) => {
+    fetchCalls.push({ url, options });
+    return {
+      ok: false,
+      json: async () => ({ code: 'PGRST116', message: 'No rows found' }),
+    };
+  };
+
+  try {
+    const fakeExpress = createFakeExpress();
+    const app = await createApp({ expressModule: fakeExpress, morganModule: () => 'request-logger', routeOptions: { fetchImpl } });
+    const login = app.routes.find((route) => route.path === '/api/v1/auth/login');
+
+    const response = createResponse();
+    await login.handler({ body: { username: 'admin', password: 'adminpass' } }, response);
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.payload.message, 'Login successful');
+    assert.equal(response.payload.user.id, 'admin');
+    assert.equal(response.payload.user.role, 'admin');
+    assert.match(response.payload.session.token, /^[^.]+\.[a-f0-9]{64}$/);
+    assert.equal(fetchCalls.length, 1);
+  } finally {
+    if (originalId === undefined) delete process.env.ADMIN_ID;
+    else process.env.ADMIN_ID = originalId;
+    if (originalPassword === undefined) delete process.env.ADMIN_PASSWORD;
+    else process.env.ADMIN_PASSWORD = originalPassword;
+    if (originalUrl === undefined) delete process.env.SUPABASE_URL;
+    else process.env.SUPABASE_URL = originalUrl;
+    if (originalAnonKey === undefined) delete process.env.SUPABASE_ANON_KEY;
+    else process.env.SUPABASE_ANON_KEY = originalAnonKey;
+    if (originalServiceRoleKey === undefined) delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    else process.env.SUPABASE_SERVICE_ROLE_KEY = originalServiceRoleKey;
+  }
+});
+
 test('admin login authenticates admin profiles through Supabase', async () => {
   const originalUrl = process.env.SUPABASE_URL;
   const originalAnonKey = process.env.SUPABASE_ANON_KEY;

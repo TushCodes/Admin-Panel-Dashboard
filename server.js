@@ -95,6 +95,28 @@ async function signInSupabasePassword(email, password, { fetchImpl = globalThis.
   return { data: { user: payload?.user, session: payload } };
 }
 
+
+function authenticateConfiguredAdmin(username, password) {
+  const adminId = process.env.ADMIN_ID;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminId || !adminPassword) return { configured: false };
+
+  const idMatches = username === adminId;
+  const passwordMatches = adminPasswordMatches(password, adminPassword);
+  if (!idMatches || !passwordMatches) return { configured: true, authenticated: false };
+
+  const session = createAdminSessionToken(adminId);
+  return {
+    configured: true,
+    authenticated: true,
+    payload: {
+      message: 'Login successful',
+      user: { id: adminId, username: adminId, role: 'admin' },
+      session,
+    },
+  };
+}
+
 function createAdminSessionToken(adminId) {
   const expiresAt = new Date(Date.now() + ADMIN_TOKEN_TTL_SECONDS * 1000).toISOString();
   const nonce = randomUUID();
@@ -130,7 +152,8 @@ export async function createApp({ expressModule = null, morganModule = null, log
   if (typeof express.static === 'function' && existsSync(frontendRoot)) {
     app.use('/assets', express.static(join(frontendRoot, 'assets')));
     app.use(express.static(frontendRoot, { index: false }));
-    app.get('/auth/login', (_req, res) => res.sendFile(join(frontendRoot, 'index.html')));
+    app.get(`${API_PREFIX}/auth/login`, (_req, res) => res.sendFile(join(frontendRoot, 'index.html')));
+    app.get(`${API_PREFIX}/admin`, (_req, res) => res.sendFile(join(frontendRoot, 'index.html')));
   }
 
   if (!expressModule) {
@@ -161,11 +184,10 @@ export async function createApp({ expressModule = null, morganModule = null, log
       return res.status(400).json({ message: 'Username and password are required' });
     }
 
+    const configuredAdmin = authenticateConfiguredAdmin(username, password);
     const { profile, profileError, configurationError: profileConfigurationError } = await findSupabaseAdminProfile(username, { fetchImpl });
     if (profileConfigurationError) {
-      const adminId = process.env.ADMIN_ID;
-      const adminPassword = process.env.ADMIN_PASSWORD;
-      if (!adminId || !adminPassword) {
+      if (!configuredAdmin.configured) {
         return res.status(503).json({
           success: false,
           error: {
@@ -175,42 +197,41 @@ export async function createApp({ expressModule = null, morganModule = null, log
         });
       }
 
-      const idMatches = username === adminId;
-      const passwordMatches = adminPasswordMatches(password, adminPassword);
-      if (!idMatches || !passwordMatches) {
+      if (!configuredAdmin.authenticated) {
         return res.status(401).json({ message: 'Invalid username or password' });
       }
 
-      const session = createAdminSessionToken(adminId);
-      return res.json({
-        message: 'Login successful',
-        user: { id: adminId, username: adminId, role: 'admin' },
-        session,
-      });
+      return res.json(configuredAdmin.payload);
+    }
+
+    if (profile && profile.role === 'admin') {
+      const { data, error, configurationError: signInConfigurationError } = await signInSupabasePassword(profile.email, password, { fetchImpl });
+      if (signInConfigurationError) {
+        return res.status(503).json({ message: 'Supabase authentication is not configured' });
+      }
+
+      if (!error) {
+        return res.json({
+          message: 'Login successful',
+          user: data.user,
+          session: data.session,
+        });
+      }
+    }
+
+    if (configuredAdmin.authenticated) {
+      return res.json(configuredAdmin.payload);
+    }
+
+    if (profile && profile.role !== 'admin') {
+      return res.status(403).json({ message: 'Not allowed' });
     }
 
     if (profileError || !profile) {
       return res.status(401).json({ message: 'Invalid username or password' });
     }
 
-    if (profile.role !== 'admin') {
-      return res.status(403).json({ message: 'Not allowed' });
-    }
-
-    const { data, error, configurationError: signInConfigurationError } = await signInSupabasePassword(profile.email, password, { fetchImpl });
-    if (signInConfigurationError) {
-      return res.status(503).json({ message: 'Supabase authentication is not configured' });
-    }
-
-    if (error) {
-      return res.status(401).json({ message: 'Invalid username or password' });
-    }
-
-    return res.json({
-      message: 'Login successful',
-      user: data.user,
-      session: data.session,
-    });
+    return res.status(401).json({ message: 'Invalid username or password' });
   }));
 
   app.get('/health', asyncHandler(async (_req, res) => {
