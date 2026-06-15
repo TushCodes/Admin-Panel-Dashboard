@@ -4,11 +4,22 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Admin Panel Dashboard Frontend</title>
-    <link rel="stylesheet" href="/styles.css" />
   </head>
-  <body>
+  <body class="m-0 min-h-screen bg-[#071c20] font-sans">
     <div id="app"></div>
 
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+            },
+          },
+        },
+      };
+    </script>
     <script type="importmap">
       {
         "imports": {
