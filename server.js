@@ -7,9 +7,7 @@ import { asyncHandler, handleException } from './utils/index.js';
 
 const ADMIN_TOKEN_TTL_SECONDS = 60 * 60 * 8;
 const API_PREFIX = '/api/v1';
-const frontendSourceRoot = join(dirname(fileURLToPath(import.meta.url)), 'frontend');
-const frontendDistRoot = join(frontendSourceRoot, 'dist');
-const frontendRoot = existsSync(frontendDistRoot) ? frontendDistRoot : frontendSourceRoot;
+const frontendRoot = join(dirname(fileURLToPath(import.meta.url)), 'frontend');
 
 function getAllowedOrigins() {
   return (process.env.CORS_ORIGIN ?? process.env.FRONTEND_ORIGIN ?? 'http://localhost:5173,http://127.0.0.1:5173')
