@@ -6,26 +6,10 @@ const LoginPage = {
     const password = ref('');
     const statusMessage = ref('');
 
-    async function handleSubmit() {
-      if (!username.value || !password.value) {
-        statusMessage.value = 'Enter both a username and password to continue.';
-        return;
-      }
-
-      statusMessage.value = 'Signing in…';
-      try {
-        const response = await fetch('/api/v1/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: username.value, password: password.value }),
-        });
-        const payload = await response.json().catch(() => ({}));
-        statusMessage.value = response.ok
-          ? (payload.message ?? 'Login successful')
-          : (payload.message ?? payload.error?.message ?? 'Invalid username or password');
-      } catch (_error) {
-        statusMessage.value = 'Unable to reach the login API. Please try again.';
-      }
+    function handleSubmit() {
+      statusMessage.value = username.value && password.value
+        ? 'Credentials captured. Connect this form to the login API to continue.'
+        : 'Enter both a username and password to continue.';
     }
 
     return { username, password, statusMessage, handleSubmit };
@@ -48,7 +32,7 @@ const LoginPage = {
           <p class="login-copy">Sign in with your administrator username and password to access the dashboard.</p>
         </aside>
 
-        <form class="login-form" action="/api/v1/auth/login" method="post" @submit.prevent="handleSubmit">
+        <form class="login-form" @submit.prevent="handleSubmit">
           <div class="login-form__header">
             <p class="login-eyebrow">Account Login</p>
             <h2>Enter your credentials</h2>
