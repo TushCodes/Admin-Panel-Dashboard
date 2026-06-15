@@ -1,7 +1,7 @@
 export const adminLoginPageRoute = {
   name: 'Admin login page',
   method: 'GET',
-  path: '/api/v1/auth/login',
+  path: '/auth/login',
   description: 'Render the admin credential login form.',
 };
 
