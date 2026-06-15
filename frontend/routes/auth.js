@@ -3,6 +3,6 @@ export const authRoutes = [
     name: 'Admin credential login',
     method: 'POST',
     path: '/api/v1/auth/login',
-    description: 'Validate an admin ID and password against server-side ADMIN_ID and ADMIN_PASSWORD environment variables without exposing secrets to the frontend.',
+    description: 'Validate a username and password through the server-side Supabase admin login flow without exposing service credentials to the frontend.',
   },
 ];
