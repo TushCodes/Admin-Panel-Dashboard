@@ -1,5 +1,7 @@
 import { createApp, ref } from 'vue';
 
+const loginStatusClass = '-mt-2 text-center font-bold text-[#c8f5a0]';
+
 const LoginPage = {
   setup() {
     const username = ref('');
@@ -12,7 +14,7 @@ const LoginPage = {
         : 'Enter both a username and password to continue.';
     }
 
-    return { username, password, statusMessage, handleSubmit };
+    return { handleSubmit, loginStatusClass, password, statusMessage, username };
   },
   template: `
     <main class="login-shell" aria-labelledby="login-title">
@@ -82,7 +84,7 @@ const HomePage = {
 };
 
 const App = {
-  components: { LoginPage, HomePage },
+  components: { HomePage, LoginPage },
   computed: {
     isLoginRoute() {
       return window.location.pathname.replace(/\/$/, '') === '/auth/login';
