@@ -9,7 +9,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
-    "frontend": "node frontend/serve.js"
+    "frontend": "node frontend/serve.js",
+    "build:css": "node scripts/build-tailwind.mjs"
   },
   "engines": {
     "node": ">=20"
