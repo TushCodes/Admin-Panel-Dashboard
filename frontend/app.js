@@ -51,6 +51,12 @@ const AdminWelcomePage = {
       { label: 'Leads', icon: '♚', active: false },
     ];
 
+    const stats = [
+      { value: '02', label: 'Active modules' },
+      { value: '24/7', label: 'Admin access' },
+      { value: '1-click', label: 'Backup ready' },
+    ];
+
     const quickLinks = [
       {
         title: 'Consignment Sheet',
@@ -66,7 +72,7 @@ const AdminWelcomePage = {
       },
     ];
 
-    return { adminLoginPageRoute, menuItems, quickLinks };
+    return { adminLoginPageRoute, menuItems, quickLinks, stats };
   },
   template: `
     <main class="admin-dashboard-shell">
@@ -111,9 +117,18 @@ const AdminWelcomePage = {
           </header>
 
           <div class="admin-content">
-            <section class="admin-welcome" aria-label="Welcome message">
-              <h2>Welcome back!</h2>
-              <p>Gram SCS Admin Panel — use the sidebar to navigate.</p>
+            <section class="admin-hero" aria-label="Welcome message">
+              <div class="admin-hero-copy">
+                <p class="admin-eyebrow">Control center</p>
+                <h2>Welcome back!</h2>
+                <p>Gram SCS Admin Panel — manage consignments, leads, and backups from a sharper command surface.</p>
+              </div>
+              <div class="admin-hero-stats" aria-label="Dashboard overview">
+                <div v-for="stat in stats" :key="stat.label" class="admin-stat">
+                  <strong>{{ stat.value }}</strong>
+                  <span>{{ stat.label }}</span>
+                </div>
+              </div>
             </section>
 
             <section class="admin-shortcuts" aria-label="Dashboard shortcuts">
