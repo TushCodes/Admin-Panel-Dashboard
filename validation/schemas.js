@@ -29,6 +29,12 @@ export const leadSchema = z.object({
 
 export const leadUpdateSchema = leadSchema.partial();
 
+export const documentSchema = z.object({
+  documentUpload: z.string().trim().min(1).max(5000),
+});
+
+export const documentUpdateSchema = documentSchema.partial();
+
 export const listQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(25),
   offset: z.coerce.number().int().min(0).default(0),

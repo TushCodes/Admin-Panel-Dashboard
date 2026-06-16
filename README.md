@@ -45,11 +45,12 @@ Do not commit real database URLs, passwords, JWT secrets, or application secret 
 
 ## API route naming
 
-Versioned application API routes use the `/api/v1` prefix so clients can distinguish stable resource endpoints from server utility endpoints. Authentication backend routes have been removed; the standalone login frontend is served from `/auth/login`. The routes selected for `/api/v1` are the business-resource routes because they represent application behavior that may need future versioning:
+Application API routes are mounted directly at their resource paths. Authentication backend routes have been removed; the standalone login frontend is served from `/auth/login`, and admin SPA panels are served below `/admin`.
 
-- `GET|POST|PATCH /api/v1/consignments` and `GET|PATCH /api/v1/consignments/:consignmentNum`
-- `GET|POST|PATCH /api/v1/leads` and `GET|PATCH /api/v1/leads/:id`
-- `GET|POST /api/v1/archived/consignments` plus archive/restore sub-routes
+- `GET|POST|PATCH /consignments` and `GET|PATCH /consignments/:consignmentNum`
+- `GET|POST|PATCH /leads` and `GET|PATCH /leads/:id`
+- `GET|POST|PATCH /documents` and `GET|PATCH /documents/:id`
+- `GET|POST /archived/consignments` plus archive/restore sub-routes
 
 The root discovery route `/` and operational health route `/health` are intentionally not versioned because they are infrastructure/status endpoints rather than business API resources.
 
@@ -79,6 +80,6 @@ Open `http://127.0.0.1:5173/auth/login` or `http://localhost:3000/auth/login`. T
 - `middleware/` contains a small framework-neutral middleware composition helper.
 - `utils/` contains JSON, logging, error-handling, and pagination helpers.
 - `services/` contains MIS PDF and Excel workbook generation helpers.
-- `server.js` contains a basic Express API with `/` and `/health` status endpoints, serves the standalone login frontend at `/auth/login`, and mounts resource routes under `/api/v1`.
+- `server.js` contains a basic Express API with `/` and `/health` status endpoints, serves the standalone login frontend at `/auth/login`, and mounts resource routes at direct resource paths.
 - `frontend/` contains a standalone login/admin frontend and tiny Node.js static file server for local frontend testing.
 - `test/` contains Node.js test runner coverage and reusable dashboard test data.
