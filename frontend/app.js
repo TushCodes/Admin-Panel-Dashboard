@@ -1,51 +1,14 @@
-import { createApp, ref } from 'vue';
+import { createApp } from 'vue';
 
-import { adminLoginPageRoute, adminLoginRoute, adminRoute } from './routes/auth.js';
+import { adminLoginPageRoute, adminRoute } from './routes/auth.js';
 
 const LoginPage = {
   setup() {
-    const username = ref('');
-    const password = ref('');
-    const statusMessage = ref('');
-    const isSubmitting = ref(false);
-    const isError = ref(false);
-
-    async function handleSubmit() {
-      isError.value = false;
-      statusMessage.value = '';
-
-      if (!username.value.trim() || !password.value) {
-        isError.value = true;
-        statusMessage.value = 'Enter both a username and password to continue.';
-        return;
-      }
-
-      isSubmitting.value = true;
-      try {
-        const response = await fetch(adminLoginRoute.path, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: username.value.trim(), password: password.value }),
-        });
-        const payload = await response.json().catch(() => ({}));
-
-        if (!response.ok) {
-          isError.value = true;
-          statusMessage.value = payload.message ?? payload.error?.message ?? 'Invalid username or password.';
-          return;
-        }
-
-        statusMessage.value = payload.message ?? 'Login successful. Opening admin dashboard...';
-        window.location.assign(adminRoute.path);
-      } catch (_error) {
-        isError.value = true;
-        statusMessage.value = 'Unable to reach the login API. Please try again.';
-      } finally {
-        isSubmitting.value = false;
-      }
+    function handleSubmit() {
+      window.location.assign(adminRoute.path);
     }
 
-    return { handleSubmit, isError, isSubmitting, password, statusMessage, username };
+    return { handleSubmit };
   },
   template: `
     <main class="relative grid min-h-screen overflow-hidden bg-[radial-gradient(circle_at_18%_18%,rgba(169,236,84,0.18),transparent_26%),linear-gradient(135deg,#0c3023_0%,#061b20_48%,#082830_100%)] px-6 py-10 text-[#f6fbfb]" aria-labelledby="login-title">
@@ -62,47 +25,18 @@ const LoginPage = {
           <div class="grid h-24 w-24 place-items-center rounded-[28px] border-[7px] border-[#a2f15f] bg-[linear-gradient(135deg,#8dde42_0%,#65b43d_52%,#9ced5e_100%)] text-2xl font-black tracking-[-0.14em] text-white [border-style:ridge] [text-shadow:0_2px_0_rgba(42,122,36,0.65)]" aria-label="GRAM">GRAM</div>
           <p class="text-sm font-extrabold uppercase tracking-[0.24em] text-[#a9ec54]">Secure Admin Portal</p>
           <h1 id="login-title" class="text-[clamp(2.5rem,5vw,4.5rem)] font-black leading-none tracking-[-0.04em]">Welcome back</h1>
-          <p class="max-w-md text-[1.08rem] leading-7 text-[rgba(221,235,230,0.76)]">Sign in with your administrator username and password to access the dashboard.</p>
+          <p class="max-w-md text-[1.08rem] leading-7 text-[rgba(221,235,230,0.76)]">Open the standalone admin frontend. No backend authentication is required.</p>
         </aside>
 
         <form class="grid gap-6 bg-[rgba(244,251,247,0.96)] p-8 text-[#0d1a16] sm:p-12" @submit.prevent="handleSubmit">
           <div class="grid gap-2">
-            <p class="text-sm font-extrabold uppercase tracking-[0.22em] text-[#76bd37]">Account Login</p>
-            <h2 class="text-3xl font-black tracking-[-0.04em]">Enter your credentials</h2>
+            <p class="text-sm font-extrabold uppercase tracking-[0.22em] text-[#76bd37]">Standalone Login</p>
+            <h2 class="text-3xl font-black tracking-[-0.04em]">Continue to dashboard</h2>
           </div>
 
-          <label class="grid gap-2 font-extrabold" for="admin-username">
-            <span>Username</span>
-            <input
-              id="admin-username"
-              v-model="username"
-              class="w-full rounded-2xl border border-[rgba(13,26,22,0.14)] bg-white px-5 py-4 font-bold text-[#0d1a16] outline outline-3 outline-transparent focus:border-[#76bd37] focus:outline-[rgba(165,238,96,0.55)]"
-              name="username"
-              type="text"
-              placeholder="Enter username"
-              autocomplete="username"
-              required
-            />
-          </label>
-
-          <label class="grid gap-2 font-extrabold" for="admin-password">
-            <span>Password</span>
-            <input
-              id="admin-password"
-              v-model="password"
-              class="w-full rounded-2xl border border-[rgba(13,26,22,0.14)] bg-white px-5 py-4 font-bold text-[#0d1a16] outline outline-3 outline-transparent focus:border-[#76bd37] focus:outline-[rgba(165,238,96,0.55)]"
-              name="password"
-              type="password"
-              placeholder="Enter password"
-              autocomplete="current-password"
-              required
-            />
-          </label>
-
-          <button class="rounded-full bg-[linear-gradient(100deg,#8bd938,#b8ed74)] px-6 py-4 font-black text-[#08150d] shadow-[0_18px_34px_rgba(116,212,59,0.18)] hover:brightness-105 focus-visible:brightness-105 disabled:cursor-not-allowed disabled:opacity-70" type="submit" :disabled="isSubmitting">
-            {{ isSubmitting ? 'Signing in…' : 'Sign in' }}
+          <button class="rounded-full bg-[linear-gradient(100deg,#8bd938,#b8ed74)] px-6 py-4 font-black text-[#08150d] shadow-[0_18px_34px_rgba(116,212,59,0.18)] hover:brightness-105 focus-visible:brightness-105 disabled:cursor-not-allowed disabled:opacity-70" type="submit">
+            Continue
           </button>
-          <p v-if="statusMessage" :class="['-mt-2 text-center font-bold', isError ? 'text-[#b42318]' : 'text-[#2f6b13]']" role="status">{{ statusMessage }}</p>
         </form>
       </section>
     </main>
@@ -117,7 +51,7 @@ const AdminWelcomePage = {
     <main class="grid min-h-screen place-content-center gap-6 bg-[radial-gradient(circle_at_12%_24%,rgba(40,130,70,0.2),transparent_28%),linear-gradient(115deg,#0f2f1f_0%,#071a22_48%,#0a2328_100%)] p-6 text-center text-[#f6fbfb]">
       <p class="text-sm font-extrabold uppercase tracking-[0.24em] text-[#a9ec54]">Admin Dashboard</p>
       <h1 class="text-[clamp(2.5rem,6vw,5rem)] font-black leading-none tracking-[-0.04em]">Welcome, admin</h1>
-      <p class="mx-auto max-w-[660px] text-[clamp(1.05rem,2vw,1.32rem)] text-[rgba(221,235,230,0.82)]">Your credentials matched successfully. This protected welcome page is ready for the next dashboard experience.</p>
+      <p class="mx-auto max-w-[660px] text-[clamp(1.05rem,2vw,1.32rem)] text-[rgba(221,235,230,0.82)]">This standalone frontend is available without backend authentication and is ready for the next dashboard experience.</p>
       <a class="mx-auto inline-flex justify-center rounded-full bg-[#98e14a] px-5 py-3.5 font-extrabold text-[#08150d] no-underline" :href="adminLoginPageRoute.path">Back to login</a>
     </main>
   `,

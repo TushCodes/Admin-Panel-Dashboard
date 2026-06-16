@@ -48,14 +48,6 @@ model Lead {
   @@map("leads")
 }
 
-model AdminUser {
-  id    Int    @id @default(autoincrement())
-  name  String @db.VarChar(255)
-  email String @unique @db.VarChar(255)
-  role  String @default("admin") @db.VarChar(50)
-
-  @@map("admin_users")
-}
 
 model DashboardMetric {
   id       Int       @id @default(autoincrement())
