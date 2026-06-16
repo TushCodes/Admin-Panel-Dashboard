@@ -1,8 +1,8 @@
 export const archivedRoutes = [
   {
-    name: 'Archived',
+    name: 'Archived Consignments',
     method: 'GET/POST',
-    path: '/api/v1/archived/consignments',
-    description: 'List archived consignments and archive or restore records.',
+    path: '/archived/consignments',
+    description: 'Archive, list, and restore consignment records.',
   },
 ];
