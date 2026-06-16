@@ -45,81 +45,99 @@ const LoginPage = {
 
 const AdminWelcomePage = {
   setup() {
-    const tabs = [
-      { id: 'overview', label: 'Overview', eyebrow: 'Command' },
-      { id: 'analytics', label: 'Analytics', eyebrow: 'Signals' },
-      { id: 'consignments', label: 'Consignments', eyebrow: 'Flow' },
-      { id: 'leads', label: 'Leads', eyebrow: 'Pipeline' },
-      { id: 'settings', label: 'Settings', eyebrow: 'Control' },
+    const menuItems = [
+      { label: 'Dashboard', icon: '⌁', active: true },
+      { label: 'Consignments', icon: '▣', active: false },
+      { label: 'Leads', icon: '♚', active: false },
     ];
 
-    return { adminLoginPageRoute, tabs };
-  },
-  data() {
-    return {
-      activeTab: 'overview',
-    };
-  },
-  computed: {
-    activeTabLabel() {
-      return this.tabs.find((tab) => tab.id === this.activeTab)?.label ?? 'Dashboard';
-    },
+    const quickLinks = [
+      {
+        title: 'Consignment Sheet',
+        description: 'Manage & export consignments',
+        icon: '▣',
+        accent: 'blue',
+      },
+      {
+        title: 'Leads Panel',
+        description: 'View customer enquiries',
+        icon: '♚',
+        accent: 'green',
+      },
+    ];
+
+    return { adminLoginPageRoute, menuItems, quickLinks };
   },
   template: `
-    <main class="min-h-screen overflow-hidden bg-[#061316] text-[#f6fbfb]">
-      <div class="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_16%_10%,rgba(169,236,84,0.18),transparent_28%),radial-gradient(circle_at_92%_18%,rgba(59,188,173,0.16),transparent_26%),linear-gradient(135deg,#09251f_0%,#061316_46%,#081f28_100%)]" aria-hidden="true"></div>
-      <div class="pointer-events-none fixed left-1/2 top-0 h-px w-[72rem] -translate-x-1/2 bg-[linear-gradient(90deg,transparent,rgba(206,255,153,0.56),transparent)]" aria-hidden="true"></div>
-
-      <div class="relative z-10 grid min-h-screen lg:grid-cols-[19rem_1fr]">
-        <aside class="border-b border-white/10 bg-white/[0.055] p-5 shadow-[24px_0_80px_rgba(0,0,0,0.22)] backdrop-blur-2xl lg:border-b-0 lg:border-r lg:p-6" aria-label="Dashboard sections">
-          <div class="flex items-center justify-between gap-4 lg:block">
-            <div class="flex items-center gap-3">
-              <div class="grid h-12 w-12 place-items-center rounded-2xl border border-[#caff80]/40 bg-[linear-gradient(135deg,#a9ec54,#4fc68d)] text-xs font-black tracking-[-0.08em] text-[#061316] shadow-[0_16px_44px_rgba(169,236,84,0.24)]" aria-label="GRAM">GRAM</div>
-              <div>
-                <p class="text-[0.68rem] font-black uppercase tracking-[0.24em] text-[#a9ec54]">Admin</p>
-                <h1 class="text-lg font-black tracking-[-0.04em]">Control Panel</h1>
-              </div>
+    <main class="admin-dashboard-shell">
+      <div class="admin-dashboard-layout">
+        <aside class="admin-sidebar" aria-label="Admin navigation">
+          <section class="admin-brand">
+            <div class="admin-brand-logo" aria-label="GRAM">GRAM</div>
+            <div class="admin-brand-copy">
+              <p>Gram SCS</p>
+              <p>Admin</p>
             </div>
-            <a class="hidden rounded-full border border-white/10 px-4 py-2 text-xs font-extrabold text-white/70 no-underline transition hover:border-[#a9ec54]/50 hover:text-white lg:inline-flex lg:mt-8" :href="adminLoginPageRoute.path">Exit</a>
-          </div>
+          </section>
 
-          <nav class="mt-6 grid gap-2" aria-label="Dashboard tabs">
+          <nav class="admin-nav" aria-label="Primary">
             <button
-              v-for="tab in tabs"
-              :key="tab.id"
-              class="group flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left transition duration-200"
-              :class="activeTab === tab.id ? 'border-[#a9ec54]/50 bg-[#a9ec54]/14 shadow-[0_18px_50px_rgba(169,236,84,0.12)]' : 'border-white/8 bg-white/[0.035] hover:border-white/18 hover:bg-white/[0.07]'"
+              v-for="item in menuItems"
+              :key="item.label"
+              class="admin-nav-item"
+              :class="{ 'is-active': item.active }"
               type="button"
-              @click="activeTab = tab.id"
             >
-              <span class="h-2.5 w-2.5 rounded-full transition" :class="activeTab === tab.id ? 'bg-[#a9ec54] shadow-[0_0_20px_rgba(169,236,84,0.9)]' : 'bg-white/25 group-hover:bg-white/45'"></span>
-              <span class="min-w-0">
-                <span class="block text-[0.63rem] font-black uppercase tracking-[0.22em]" :class="activeTab === tab.id ? 'text-[#caff80]' : 'text-white/38'">{{ tab.eyebrow }}</span>
-                <span class="block text-sm font-extrabold" :class="activeTab === tab.id ? 'text-white' : 'text-white/72'">{{ tab.label }}</span>
-              </span>
+              <span class="admin-nav-icon" aria-hidden="true">{{ item.icon }}</span>
+              <span>{{ item.label }}</span>
             </button>
           </nav>
+
+          <div class="admin-sidebar-footer">
+            <a class="admin-logout-link" :href="adminLoginPageRoute.path">
+              <span class="admin-nav-icon" aria-hidden="true">⇱</span>
+              <span>Logout</span>
+            </a>
+          </div>
         </aside>
 
-        <section class="grid min-h-screen grid-rows-[auto_1fr] p-5 sm:p-8 lg:p-10" aria-labelledby="dashboard-title">
-          <header class="flex flex-col justify-between gap-5 rounded-[2rem] border border-white/10 bg-white/[0.055] p-6 shadow-[0_24px_90px_rgba(0,0,0,0.22)] backdrop-blur-2xl md:flex-row md:items-center">
-            <div>
-              <p class="text-xs font-black uppercase tracking-[0.28em] text-[#a9ec54]">{{ activeTabLabel }}</p>
-              <h2 id="dashboard-title" class="mt-2 text-[clamp(2rem,5vw,4.6rem)] font-black leading-none tracking-[-0.06em]">Dashboard panel</h2>
-            </div>
-            <div class="flex items-center gap-3 rounded-full border border-white/10 bg-black/20 px-4 py-3 text-sm font-bold text-white/68">
-              <span class="h-2.5 w-2.5 rounded-full bg-[#a9ec54] shadow-[0_0_22px_rgba(169,236,84,0.9)]"></span>
-              Empty workspace
+        <section class="admin-main" aria-labelledby="dashboard-title">
+          <header class="admin-topbar">
+            <h1 id="dashboard-title">Dashboard</h1>
+            <div class="admin-actions">
+              <span class="admin-badge">Admin</span>
+              <a class="admin-outline-button" :href="adminLoginPageRoute.path">Logout</a>
             </div>
           </header>
 
-          <div class="mt-6 grid rounded-[2.25rem] border border-dashed border-white/14 bg-[linear-gradient(145deg,rgba(255,255,255,0.075),rgba(255,255,255,0.025))] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_30px_100px_rgba(0,0,0,0.22)] backdrop-blur-2xl">
-            <div class="grid min-h-[48vh] place-items-center rounded-[1.75rem] border border-white/8 bg-[#071c20]/55">
-              <div class="max-w-md text-center">
-                <p class="text-sm font-black uppercase tracking-[0.3em] text-white/34">No widgets yet</p>
-                <p class="mt-4 text-lg font-semibold leading-8 text-white/62">Use the sidebar tabs to move through the future dashboard sections. This canvas is intentionally empty for now.</p>
+          <div class="admin-content">
+            <section class="admin-welcome" aria-label="Welcome message">
+              <h2>Welcome back!</h2>
+              <p>Gram SCS Admin Panel — use the sidebar to navigate.</p>
+            </section>
+
+            <section class="admin-shortcuts" aria-label="Dashboard shortcuts">
+              <article v-for="link in quickLinks" :key="link.title" class="admin-card">
+                <div class="admin-card-body">
+                  <div class="admin-card-icon" :class="'is-' + link.accent" aria-hidden="true">{{ link.icon }}</div>
+                  <div>
+                    <h3>{{ link.title }}</h3>
+                    <p>{{ link.description }}</p>
+                  </div>
+                </div>
+                <button class="admin-card-button" :class="'is-' + link.accent" type="button">Open →</button>
+              </article>
+            </section>
+
+            <section class="admin-backup-card" aria-label="Database backup">
+              <div>
+                <h3>Database Backup</h3>
+                <p>Generate and download a one-shot JSON backup</p>
               </div>
-            </div>
+              <button type="button">Download Backup</button>
+            </section>
+
+            <p class="admin-note">More sections will be added here as the dashboard grows. — Gram SCS IT Dept.</p>
           </div>
         </section>
       </div>
