@@ -58,9 +58,10 @@ test('createApp wires basic Express routes and middleware', async () => {
   assert.deepEqual(rootResponse.payload.endpoints, {
     health: '/health',
     login: '/auth/login',
-    consignments: '/api/v1/consignments',
-    leads: '/api/v1/leads',
-    archived: '/api/v1/archived/consignments',
+    consignments: '/consignments',
+    leads: '/leads',
+    documents: '/documents',
+    archived: '/archived/consignments',
   });
 
   const healthResponse = createResponse();
@@ -69,21 +70,23 @@ test('createApp wires basic Express routes and middleware', async () => {
   assert.match(healthResponse.payload.timestamp, /^\d{4}-\d{2}-\d{2}T/);
 });
 
-test('resource routes are mounted under the versioned API prefix', async () => {
+test('resource routes are mounted without a versioned API prefix', async () => {
   const { registerRoutes } = await import('../routes/index.js');
   const mounted = [];
   const app = { use(path, router) { mounted.push({ path, router }); } };
   const options = {
     consignmentRoutes: 'consignment-router',
     leadRoutes: 'lead-router',
+    documentRoutes: 'document-router',
     archivedRoutes: 'archived-router',
   };
 
   registerRoutes(app, options);
 
   assert.deepEqual(mounted, [
-    { path: '/api/v1/consignments', router: 'consignment-router' },
-    { path: '/api/v1/leads', router: 'lead-router' },
-    { path: '/api/v1/archived', router: 'archived-router' },
+    { path: '/consignments', router: 'consignment-router' },
+    { path: '/leads', router: 'lead-router' },
+    { path: '/documents', router: 'document-router' },
+    { path: '/archived', router: 'archived-router' },
   ]);
 });

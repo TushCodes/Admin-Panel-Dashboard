@@ -19,7 +19,6 @@ model Consignment {
   dropPincode    String?   @map("drop_pincode") @db.VarChar(20)
   dropTag        String?   @map("drop_tag") @db.VarChar(100)
   dropDate       DateTime? @map("drop_date") @db.Date
-  document       Document?
 
   @@index([pickupPincode])
   @@index([dropPincode])
@@ -27,10 +26,8 @@ model Consignment {
 }
 
 model Document {
-  documentId  String      @id @map("document_id") @db.VarChar(64)
-  pod         String?     @db.Text
-  invoice     String?     @db.Text
-  consignment Consignment @relation(fields: [documentId], references: [consignmentNum], onDelete: Cascade)
+  id             Int    @id @default(autoincrement())
+  documentUpload String @map("document_upload") @db.Text
 
   @@map("documents")
 }

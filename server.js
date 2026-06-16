@@ -4,7 +4,6 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { asyncHandler, handleException } from './utils/index.js';
 
-const API_PREFIX = '/api/v1';
 const frontendRoot = join(dirname(fileURLToPath(import.meta.url)), 'frontend');
 
 function getAllowedOrigins() {
@@ -38,7 +37,7 @@ export async function createApp({ expressModule = null, morganModule = null, log
     app.use('/assets', express.static(join(frontendRoot, 'assets')));
     app.use(express.static(frontendRoot, { index: false }));
     app.get('/auth/login', (_req, res) => res.sendFile(join(frontendRoot, 'index.html')));
-    app.get('/admin', (_req, res) => res.sendFile(join(frontendRoot, 'index.html')));
+    app.get(['/admin', '/admin/consignments', '/admin/lead', '/admin/documents', '/admin/archived'], (_req, res) => res.sendFile(join(frontendRoot, 'index.html')));
   }
 
   if (!expressModule) {
@@ -53,9 +52,10 @@ export async function createApp({ expressModule = null, morganModule = null, log
       endpoints: {
         health: '/health',
         login: '/auth/login',
-        consignments: `${API_PREFIX}/consignments`,
-        leads: `${API_PREFIX}/leads`,
-        archived: `${API_PREFIX}/archived/consignments`,
+        consignments: '/consignments',
+        leads: '/leads',
+        documents: '/documents',
+        archived: '/archived/consignments',
       },
     });
   }));
