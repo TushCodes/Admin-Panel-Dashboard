@@ -29,7 +29,7 @@ The application reads the database URL lazily only when a Prisma Client is reque
 
 Copy `.env.example` to `.env` for local development or add the same keys to Render, Supabase, or another deployment secret store. The Supabase pooled PostgreSQL URL should be assigned to `DATABASE_URL`; do not paste it directly into source files, tests, logs, or frontend code because it includes the database password.
 
-Do not commit real database URLs, passwords, JWT secrets, or application secret keys. The public Supabase anon key may be used by the browser auth client, but it should still be configured through local storage, deployment settings, or a generated runtime config instead of hard-coded in this repository.
+Do not commit real database URLs, passwords, JWT secrets, or application secret keys. The login page is a standalone frontend and does not require browser or server authentication keys.
 
 ## Prisma workflow
 
@@ -45,9 +45,8 @@ Do not commit real database URLs, passwords, JWT secrets, or application secret 
 
 ## API route naming
 
-Versioned application API routes use the `/api/v1` prefix so clients can distinguish stable resource endpoints from server utility endpoints. The routes selected for `/api/v1` are the admin login and business-resource routes because they represent application behavior that may need future versioning:
+Versioned application API routes use the `/api/v1` prefix so clients can distinguish stable resource endpoints from server utility endpoints. Authentication backend routes have been removed; the standalone login frontend is served from `/auth/login`. The routes selected for `/api/v1` are the business-resource routes because they represent application behavior that may need future versioning:
 
-- `POST /api/v1/auth/login`
 - `GET|POST|PATCH /api/v1/consignments` and `GET|PATCH /api/v1/consignments/:consignmentNum`
 - `GET|POST|PATCH /api/v1/leads` and `GET|PATCH /api/v1/leads/:id`
 - `GET|POST /api/v1/archived/consignments` plus archive/restore sub-routes
@@ -56,7 +55,7 @@ The root discovery route `/` and operational health route `/health` are intentio
 
 ## Dummy frontend
 
-A lightweight static frontend lives in `frontend/`. It can be served on its own origin for CORS testing while the Express API runs separately.
+A lightweight static frontend lives in `frontend/`. The login page is standalone and can be served by Express at `/auth/login` or on its own origin for local frontend work.
 
 Start the backend in one terminal:
 
@@ -70,7 +69,7 @@ Start the dummy frontend in another terminal:
 npm run frontend
 ```
 
-Open `http://127.0.0.1:5173`, keep the default `http://localhost:3000/health` URL or change it to the backend URL you want to test, and click **Check backend**. To use login/logout, paste your Supabase project URL and public anon key into the Supabase authentication card; the frontend renders Supabase Auth UI and uses the Supabase client to sign users in and out. If a backend request fails while the backend is running, the backend likely still needs CORS headers for the frontend origin.
+Open `http://127.0.0.1:5173/auth/login` or `http://localhost:3000/auth/login`. The login page does not call a backend authentication endpoint; clicking **Continue** opens the standalone admin page.
 
 ## Project layout
 
@@ -80,6 +79,6 @@ Open `http://127.0.0.1:5173`, keep the default `http://localhost:3000/health` UR
 - `middleware/` contains a small framework-neutral middleware composition helper.
 - `utils/` contains JSON, logging, error-handling, and pagination helpers.
 - `services/` contains MIS PDF and Excel workbook generation helpers.
-- `server.js` contains a basic Express API with `/` and `/health` status endpoints, while resource and authentication routes are mounted under `/api/v1`.
-- `frontend/` contains a dummy static page and tiny Node.js static file server for CORS testing.
+- `server.js` contains a basic Express API with `/` and `/health` status endpoints, serves the standalone login frontend at `/auth/login`, and mounts resource routes under `/api/v1`.
+- `frontend/` contains a standalone login/admin frontend and tiny Node.js static file server for local frontend testing.
 - `test/` contains Node.js test runner coverage and reusable dashboard test data.
