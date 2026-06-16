@@ -7,14 +7,12 @@ const adminSections = {
   consignments: { path: '/admin/consignments', title: 'Consignments', label: 'Consignments', icon: '▣' },
   leads: { path: '/admin/lead', title: 'Leads', label: 'Leads', icon: '♚' },
   documents: { path: '/admin/documents', title: 'Documents', label: 'Documents', icon: '☷' },
-  archived: { path: '/admin/archived', title: 'Archived', label: 'Archived', icon: '◫' },
 };
 
 const apiPaths = {
   consignments: '/consignments',
   leads: '/leads',
   documents: '/documents',
-  archived: '/archived/consignments',
 };
 
 const LoginPage = {
@@ -48,7 +46,6 @@ const ResourcePanel = {
       consignments: { eyebrow: 'Operations', title: 'Consignment Sheet', description: 'View and manage active consignment records.', columns: ['Consignment #', 'Status', 'Pickup', 'Drop'], fields: ['consignmentNum', 'status', 'pickupAddress', 'dropAddress'] },
       leads: { eyebrow: 'Sales', title: 'Leads Panel', description: 'Review customer enquiries and contact details.', columns: ['ID', 'Name', 'Phone', 'Subject'], fields: ['id', 'name', 'phone', 'subject'] },
       documents: { eyebrow: 'Files', title: 'Documents', description: 'Track uploaded document references.', columns: ['ID', 'Document upload'], fields: ['id', 'documentUpload'] },
-      archived: { eyebrow: 'Archive', title: 'Archived Consignments', description: 'Review consignments that have been archived.', columns: ['Consignment #', 'Status', 'Pickup', 'Drop'], fields: ['consignmentNum', 'status', 'pickupAddress', 'dropAddress'] },
     }[props.section]));
 
     async function loadItems() {
@@ -92,9 +89,8 @@ const AdminWelcomePage = {
       { title: 'Consignment Sheet', description: 'Manage & export consignments', icon: '▣', accent: 'blue', path: adminSections.consignments.path },
       { title: 'Leads Panel', description: 'View customer enquiries', icon: '♚', accent: 'green', path: adminSections.leads.path },
       { title: 'Documents', description: 'Review document uploads', icon: '☷', accent: 'purple', path: adminSections.documents.path },
-      { title: 'Archived', description: 'Open archived consignments', icon: '◫', accent: 'amber', path: adminSections.archived.path },
     ];
-    const stats = [{ value: '04', label: 'Active modules' }, { value: '24/7', label: 'Admin access' }, { value: '1-click', label: 'Backup ready' }];
+    const stats = [{ value: '03', label: 'Active modules' }, { value: '24/7', label: 'Admin access' }, { value: '1-click', label: 'Backup ready' }];
     function navigate(path) { window.history.pushState({}, '', path); window.dispatchEvent(new Event('popstate')); }
     return { adminLoginPageRoute, currentSection, menuItems, quickLinks, stats, navigate };
   },
