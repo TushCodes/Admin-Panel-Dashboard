@@ -1,6 +1,6 @@
 import { computed } from 'vue';
 
-import { adminLoginPageRoute } from '../routes/auth.js';
+import { adminLoginPageRoute } from '../routes.js';
 import { ResourcePanel } from './ResourcePanel.js';
 
 export const adminSections = {
