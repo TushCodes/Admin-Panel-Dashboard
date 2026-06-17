@@ -49,12 +49,6 @@ The static MVP frontend lives in `frontend/` and is served by the main Express a
 For frontend-only local work, run:
 
 ```bash
-npm run frontend
-```
-
-Rebuild the static CSS bundle with:
-
-```bash
 npm run build:frontend
 ```
 
@@ -72,6 +66,6 @@ npm run build:frontend
 - `controllers/` contains resource handlers.
 - `db/` contains lazy Prisma connection helpers.
 - `frontend/` contains the static Vue MVP screens.
-- `services/` contains report generation helpers.
+- `services/` contains report generation helpers used by tests and future exports.
 - `utils/` contains shared error, JSON, logging, and pagination helpers.
 - `test/` contains Node.js test runner coverage.
