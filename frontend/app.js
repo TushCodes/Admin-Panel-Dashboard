@@ -1,10 +1,10 @@
 import { createApp, ref } from 'vue';
 
-import { adminLoginPageRoute, adminRoute } from './routes/auth.js';
-import { AdminWelcomePage, ConsignmentTestPage, HomePage, LoginPage, adminSections } from './pages/index.js';
+import { AdminWelcomePage, HomePage, LoginPage, adminSections } from './pages/index.js';
+import { adminLoginPageRoute } from './routes.js';
 
 const App = {
-  components: { AdminWelcomePage, ConsignmentTestPage, HomePage, LoginPage },
+  components: { AdminWelcomePage, HomePage, LoginPage },
   setup() {
     const normalizePath = (value) => value.replace(/\/$/, '') || '/';
     const path = ref(normalizePath(window.location.pathname));
@@ -17,10 +17,10 @@ const App = {
       }
     }
 
-    return { adminLoginPageRoute, adminRoute, path, navigate };
+    return { adminLoginPageRoute, path, navigate };
   },
   computed: { isAdminRoute() { return Object.values(adminSections).some((route) => route.path === this.path); } },
-  template: '<LoginPage v-if="path === adminLoginPageRoute.path" /><ConsignmentTestPage v-else-if="path === \'/consignment-test\'" /><AdminWelcomePage v-else-if="isAdminRoute" :route-path="path" @navigate="navigate" /><HomePage v-else />',
+  template: '<LoginPage v-if="path === adminLoginPageRoute.path" /><AdminWelcomePage v-else-if="isAdminRoute" :route-path="path" @navigate="navigate" /><HomePage v-else />',
 };
 
 createApp(App).mount('#app');
