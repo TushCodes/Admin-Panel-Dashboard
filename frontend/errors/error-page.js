@@ -9,6 +9,10 @@ createApp({
     const page = computed(() => errorPages.find((errorPage) => errorPage.code === codeFromPath) ?? errorPages[0]);
     const relatedPages = computed(() => errorPages.filter((errorPage) => errorPage.code !== page.value.code));
 
-    return { page, relatedPages };
+    function goBack() {
+      window.history.back();
+    }
+
+    return { page, relatedPages, goBack };
   },
 }).mount('#app');

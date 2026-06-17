@@ -14,7 +14,8 @@ export const adminSections = {
 export const AdminWelcomePage = {
   components: { ResourcePanel },
   props: { routePath: { type: String, required: true } },
-  setup(props) {
+  emits: ['navigate'],
+  setup(props, { emit }) {
     const currentSection = computed(() => Object.entries(adminSections).find(([, section]) => section.path === props.routePath)?.[0] ?? 'dashboard');
     const menuItems = computed(() => Object.values(adminSections).map((item) => ({ ...item, active: item.path === props.routePath })));
     const quickLinks = [
@@ -24,7 +25,7 @@ export const AdminWelcomePage = {
       { title: 'Archive', description: 'View archived consignments', icon: '◴', accent: 'orange', path: adminSections.archived.path },
     ];
     const stats = [{ value: '04', label: 'Active modules' }, { value: '24/7', label: 'Admin access' }, { value: '1-click', label: 'Backup ready' }];
-    function navigate(path) { window.history.pushState({}, '', path); window.dispatchEvent(new Event('popstate')); }
+    function navigate(path) { emit('navigate', path); }
     return { adminLoginPageRoute, currentSection, menuItems, quickLinks, stats, navigate };
   },
   template: `
