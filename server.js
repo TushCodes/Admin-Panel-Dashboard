@@ -2,7 +2,8 @@ import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import { asyncHandler, handleException } from './utils/index.js';
+import { asyncHandler } from './utils/asyncHandler.js';
+import { handleException } from './utils/errorHandling.js';
 
 const frontendRoot = join(dirname(fileURLToPath(import.meta.url)), 'frontend');
 

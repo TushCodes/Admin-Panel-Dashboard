@@ -1,4 +1,4 @@
-import { adminLoginPageRoute } from '../routes/auth.js';
+import { adminLoginPageRoute } from '../routes.js';
 
 export const HomePage = {
   setup() { return { adminLoginPageRoute }; },

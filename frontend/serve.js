@@ -26,9 +26,9 @@ app.use((req, res) => {
     return res.sendFile(join(frontendRoot, 'index.html'));
   }
 
-  return res.status(404).sendFile(join(frontendRoot, 'errors', '404.html'));
+  return res.status(404).send('Not found');
 });
 
 app.listen(port, host, () => {
-  console.log(`Dummy frontend listening on http://${host}:${port}`);
+  console.log(`MVP frontend listening on http://${host}:${port}`);
 });

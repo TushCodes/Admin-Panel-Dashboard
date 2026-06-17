@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import { createLeadController } from '../controllers/index.js';
-import { asyncHandler } from '../utils/index.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
 import { leadSchema, leadUpdateSchema, listQuerySchema } from '../validation/schemas.js';
 import { validate } from './validation.js';
 
