@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import { createConsignmentController } from '../controllers/index.js';
-import { asyncHandler } from '../utils/index.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
 import { consignmentSchema, consignmentUpdateSchema, listQuerySchema } from '../validation/schemas.js';
 import { validate } from './validation.js';
 

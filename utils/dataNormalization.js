@@ -25,30 +25,6 @@ export class DataNormalizer {
     const values = Array.isArray(value) ? value : String(value ?? '').split(delimiter);
     return DataNormalizer.normalizeStringList(values);
   }
-
-  static normalizeTableColumns(columns, fallbackColumns = []) {
-    const normalizedColumns = DataNormalizer.normalizeStringList(columns);
-    return normalizedColumns.length > 0 ? normalizedColumns : [...fallbackColumns];
-  }
-
-  static deriveTableColumns(columns, rows, fallbackColumns = []) {
-    const normalizedColumns = DataNormalizer.normalizeTableColumns(columns);
-    if (normalizedColumns.length > 0) return normalizedColumns;
-    const firstObjectRow = Array.isArray(rows) ? rows.find((row) => row && !Array.isArray(row) && typeof row === 'object') : null;
-    return firstObjectRow ? Object.keys(firstObjectRow) : [...fallbackColumns];
-  }
-
-  static normalizeTableRows(rows, columns, { output = 'object' } = {}) {
-    if (!Array.isArray(rows)) return [];
-    return rows.map((row) => {
-      if (output === 'array') {
-        if (Array.isArray(row)) return columns.map((_, index) => row[index] ?? '');
-        return columns.map((column) => row?.[column] ?? '');
-      }
-      if (Array.isArray(row)) return Object.fromEntries(columns.map((column, index) => [column, row[index] ?? '']));
-      return { ...row };
-    });
-  }
 }
 
 export function normalizeForJson(value) {
@@ -65,16 +41,4 @@ export function normalizeStringList(values) {
 
 export function normalizeDelimitedStringList(value, delimiter = ',') {
   return DataNormalizer.normalizeDelimitedStringList(value, delimiter);
-}
-
-export function normalizeTableColumns(columns, fallbackColumns = []) {
-  return DataNormalizer.normalizeTableColumns(columns, fallbackColumns);
-}
-
-export function deriveTableColumns(columns, rows, fallbackColumns = []) {
-  return DataNormalizer.deriveTableColumns(columns, rows, fallbackColumns);
-}
-
-export function normalizeTableRows(rows, columns, options = {}) {
-  return DataNormalizer.normalizeTableRows(rows, columns, options);
 }

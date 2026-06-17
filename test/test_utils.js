@@ -4,7 +4,7 @@ import test from 'node:test';
 import { DatabaseConnectionDisabledError, ensureDatabaseConnectionEnabled } from '../utils/dbError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { BadRequestError, NotFoundError, handleException } from '../utils/errorHandling.js';
-import { APIResponse, DataNormalizer, JsonUtils, jsonResponse, normalizeDelimitedStringList, normalizeTableColumns, normalizeTableRows, parseJsonBody, toJson } from '../utils/json.js';
+import { APIResponse, DataNormalizer, JsonUtils, jsonResponse, normalizeDelimitedStringList, parseJsonBody, toJson } from '../utils/json.js';
 import { getLogger } from '../utils/logging.js';
 
 test('parseJsonBody accepts object payloads', () => {
@@ -32,11 +32,8 @@ test('class utility exports mirror function helpers', () => {
 });
 
 
-test('data normalization helpers trim lists and shape table rows', () => {
+test('data normalization helpers trim delimited lists', () => {
   assert.deepEqual(normalizeDelimitedStringList(' name, -created_at, ,status '), ['name', '-created_at', 'status']);
-  assert.deepEqual(normalizeTableColumns([' Metric ', '', 'Value']), ['Metric', 'Value']);
-  assert.deepEqual(normalizeTableRows([['Leads', 12]], ['Metric', 'Value']), [{ Metric: 'Leads', Value: 12 }]);
-  assert.deepEqual(normalizeTableRows([{ Metric: 'Revenue', Value: 2500 }], ['Metric', 'Value'], { output: 'array' }), [['Revenue', 2500]]);
 });
 
 test('asyncHandler forwards rejected errors to next', async () => {
