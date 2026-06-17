@@ -1,16 +1,38 @@
 import { getPrismaClient } from './connection.js';
 
+function buildConsignmentWhere({ status, q } = {}) {
+  return {
+    ...(status ? { status } : {}),
+    ...(q
+      ? {
+          OR: [
+            { consignmentNum: { contains: q } },
+            { pickupAddress: { contains: q } },
+            { dropAddress: { contains: q } },
+          ],
+        }
+      : {}),
+  };
+}
+
 async function resolveClient(prisma) {
   return prisma ?? getPrismaClient();
 }
 
-export async function listConsignments({ limit, offset } = {}, { prisma = null } = {}) {
+export async function listConsignments({ limit, offset, status, q } = {}, { prisma = null } = {}) {
   const client = await resolveClient(prisma);
-  return client.consignment.findMany({
-    skip: offset,
-    take: limit,
-    orderBy: { consignmentNum: 'desc' },
-  });
+  const where = buildConsignmentWhere({ status, q });
+  const [items, total] = await Promise.all([
+    client.consignment.findMany({
+      where,
+      skip: offset,
+      take: limit,
+      orderBy: { consignmentNum: 'desc' },
+    }),
+    client.consignment.count({ where }),
+  ]);
+
+  return { items, total };
 }
 
 export async function createConsignment(data, { prisma = null } = {}) {
