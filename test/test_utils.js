@@ -25,10 +25,9 @@ test('toJson serializes dates compactly', () => {
   assert.equal(toJson({ created_on: new Date('2026-06-09T00:00:00.000Z') }), '{"created_on":"2026-06-09"}');
 });
 
-test('class utility exports mirror function helpers', () => {
-  assert.deepEqual(DataNormalizer.normalizeForJson({ id: 1n }), { id: '1' });
-  assert.equal(JsonUtils.toJson({ created_on: new Date('2026-06-09T00:00:00.000Z') }), '{"created_on":"2026-06-09"}');
-  assert.deepEqual(APIResponse.success({ id: 1 }), jsonResponse({ id: 1 }));
+test('function utility exports cover JSON normalization and responses', () => {
+  assert.deepEqual(normalizeForJson({ id: 1n }), { id: '1' });
+  assert.deepEqual(jsonResponse({ id: 1 }), [{ success: true, message: 'OK', data: { id: 1 } }, 200]);
 });
 
 
