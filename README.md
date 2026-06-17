@@ -49,7 +49,7 @@ The static MVP frontend lives in `frontend/` and is served by the main Express a
 For frontend-only local work, run:
 
 ```bash
-npm run frontend
+npm run build:frontend
 ```
 
 ## Prisma workflow
