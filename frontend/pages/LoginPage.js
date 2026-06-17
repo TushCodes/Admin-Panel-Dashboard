@@ -1,5 +1,5 @@
+import { adminRoute } from '../routes.js';
 import { LoginCard } from '../components/LoginCard.js';
-import { adminRoute } from '../routes/auth.js';
 
 export const LoginPage = {
   components: { LoginCard },
