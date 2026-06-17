@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import { createDocumentController } from '../controllers/index.js';
-import { asyncHandler } from '../utils/index.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
 import { documentSchema, documentUpdateSchema, listQuerySchema } from '../validation/schemas.js';
 import { validate } from './validation.js';
 
