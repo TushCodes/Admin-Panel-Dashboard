@@ -4,7 +4,6 @@ const apiPaths = {
   consignments: '/consignments/aggregated-consignments',
   leads: '/leads',
   documents: '/documents',
-  archived: '/archived/consignments',
 };
 
 export const ResourcePanel = {
@@ -17,7 +16,6 @@ export const ResourcePanel = {
       consignments: { eyebrow: 'Operations', title: 'Consignment Sheet', description: 'View and manage active consignment records.', columns: ['Consignment #', 'Status', 'Pickup', 'Drop'], fields: ['consignmentNum', 'status', 'pickupAddress', 'dropAddress'] },
       leads: { eyebrow: 'Sales', title: 'Leads Panel', description: 'Review customer enquiries and contact details.', columns: ['ID', 'Name', 'Phone', 'Subject'], fields: ['id', 'name', 'phone', 'subject'] },
       documents: { eyebrow: 'Files', title: 'Documents', description: 'Track uploaded document references.', columns: ['ID', 'Document upload'], fields: ['id', 'documentUpload'] },
-      archived: { eyebrow: 'Archive', title: 'Archived Consignments', description: 'View archived consignment records.', columns: ['Consignment #', 'Status', 'Pickup', 'Drop'], fields: ['consignmentNum', 'status', 'pickupAddress', 'dropAddress'] },
     }[props.section]));
 
     async function loadItems() {

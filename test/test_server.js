@@ -62,7 +62,6 @@ test('createApp wires basic Express routes and middleware', async () => {
     consignments: '/consignments/aggregated-consignments',
     leads: '/leads',
     documents: '/documents',
-    archived: '/archived/consignments',
   });
 
   const healthResponse = createResponse();
@@ -109,7 +108,6 @@ test('resource routes are mounted without a versioned API prefix', async () => {
     consignmentRoutes: 'consignment-router',
     leadRoutes: 'lead-router',
     documentRoutes: 'document-router',
-    archivedRoutes: 'archived-router',
   };
 
   registerRoutes(app, options);
@@ -118,6 +116,5 @@ test('resource routes are mounted without a versioned API prefix', async () => {
     { path: '/consignments', router: 'consignment-router' },
     { path: '/leads', router: 'lead-router' },
     { path: '/documents', router: 'document-router' },
-    { path: '/archived', router: 'archived-router' },
   ]);
 });

@@ -43,7 +43,7 @@ export async function createApp({ expressModule = null, morganModule = null, log
     app.use('/vendor', express.static(join(repoRoot, 'node_modules', 'vue', 'dist')));
     app.use(express.static(frontendRoot, { index: false }));
     app.get('/auth/login', (_req, res) => res.sendFile(join(frontendRoot, 'index.html')));
-    app.get(['/admin', '/admin/consignments', '/admin/lead', '/admin/documents', '/admin/archived'], (_req, res) => res.sendFile(join(frontendRoot, 'index.html')));
+    app.get(['/admin', '/admin/consignments', '/admin/lead', '/admin/documents'], (_req, res) => res.sendFile(join(frontendRoot, 'index.html')));
   }
 
   if (!expressModule) {
@@ -61,7 +61,6 @@ export async function createApp({ expressModule = null, morganModule = null, log
         consignments: '/consignments/aggregated-consignments',
         leads: '/leads',
         documents: '/documents',
-        archived: '/archived/consignments',
       },
     });
   }));
