@@ -15,5 +15,4 @@
    return router;
  }
  
-EOF
 )
