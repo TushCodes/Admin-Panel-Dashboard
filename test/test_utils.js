@@ -4,7 +4,7 @@ import test from 'node:test';
 import { DatabaseConnectionDisabledError, ensureDatabaseConnectionEnabled } from '../utils/dbError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { BadRequestError, NotFoundError, handleException } from '../utils/errorHandling.js';
-import { APIResponse, DataNormalizer, JsonUtils, jsonResponse, normalizeDelimitedStringList, parseJsonBody, toJson } from '../utils/json.js';
+import { APIResponse, DataNormalizer, JsonUtils, jsonResponse, normalizeDelimitedStringList, normalizeForJson, parseJsonBody, toJson } from '../utils/json.js';
 import { getLogger } from '../utils/logging.js';
 
 test('parseJsonBody accepts object payloads', () => {
@@ -19,6 +19,12 @@ test('jsonResponse uses the standard envelope', () => {
   const [payload, statusCode] = jsonResponse({ id: 1 }, { message: 'Created', statusCode: 201 });
   assert.equal(statusCode, 201);
   assert.deepEqual(payload, { success: true, message: 'Created', data: { id: 1 } });
+});
+
+test('utility class facades expose MVP helpers', () => {
+  assert.deepEqual(APIResponse.success({ id: 1 }), [{ success: true, message: 'OK', data: { id: 1 } }, 200]);
+  assert.equal(JsonUtils.toJson({ id: 2n }), '{"id":"2"}');
+  assert.equal(DataNormalizer.normalizeDateOnly('2026-06-18T12:00:00.000Z'), '2026-06-18');
 });
 
 test('toJson serializes dates compactly', () => {

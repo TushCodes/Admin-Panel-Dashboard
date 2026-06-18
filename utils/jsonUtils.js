@@ -1,6 +1,20 @@
 import { BadRequestError } from './errorHandling.js';
 import { normalizeForJson } from './dataNormalization.js';
 
+export class JsonUtils {
+  static toJson(payload) {
+    return toJson(payload);
+  }
+
+  static fromJson(rawBody) {
+    return fromJson(rawBody);
+  }
+
+  static parseJsonBody(rawBody, options = {}) {
+    return parseJsonBody(rawBody, options);
+  }
+}
+
 export function toJson(payload) {
   return JSON.stringify(normalizeForJson(payload));
 }
