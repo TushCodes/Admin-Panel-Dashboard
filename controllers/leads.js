@@ -5,13 +5,10 @@ export function createLeadController({ prisma = null } = {}) {
   return {
     async list(req, res) {
       const client = await db(prisma);
-      const { limit, offset, q } = req.query;
+      const { q } = req.query;
       const where = q ? { OR: [{ name: { contains: q } }, { email: { contains: q } }, { phone: { contains: q } }, { subject: { contains: q } }] } : {};
-      const [items, total] = await Promise.all([
-        client.lead.findMany({ where, skip: offset, take: limit, orderBy: { id: 'desc' } }),
-        client.lead.count({ where }),
-      ]);
-      res.json({ success: true, data: items, metadata: { total, limit, offset } });
+      const items = await client.lead.findMany({ where, orderBy: { id: 'desc' } });
+      res.json({ success: true, data: items });
     },
 
     async create(req, res) {

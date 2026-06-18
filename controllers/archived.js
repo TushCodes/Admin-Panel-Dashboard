@@ -6,14 +6,11 @@ export function createArchivedController({ prisma = null } = {}) {
   return {
     async listConsignments(req, res) {
       const client = await db(prisma);
-      const { limit, offset, q } = req.query;
+      const { q } = req.query;
       const search = q ? { OR: [{ consignmentNum: { contains: q } }, { pickupAddress: { contains: q } }, { dropAddress: { contains: q } }] } : {};
       const where = archivedWhere(search);
-      const [items, total] = await Promise.all([
-        client.consignment.findMany({ where, skip: offset, take: limit, orderBy: { consignmentNum: 'desc' } }),
-        client.consignment.count({ where }),
-      ]);
-      res.json({ success: true, data: items, metadata: { total, limit, offset } });
+      const items = await client.consignment.findMany({ where, orderBy: { consignmentNum: 'desc' } });
+      res.json({ success: true, data: items });
     },
 
     async archiveConsignment(req, res) {
