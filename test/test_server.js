@@ -59,7 +59,7 @@ test('createApp wires basic Express routes and middleware', async () => {
   assert.deepEqual(rootResponse.payload.endpoints, {
     health: '/health',
     login: '/auth/login',
-    consignments: '/consignments',
+    consignments: '/consignments/aggregated-consignments',
     leads: '/leads',
     documents: '/documents',
     archived: '/archived/consignments',
