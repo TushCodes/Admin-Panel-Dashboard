@@ -6,7 +6,7 @@ export function createDocumentController({ prisma = null } = {}) {
   return {
     async list(req, res) {
       const client = await db(prisma);
-      const where = req.query.q ? { documentUpload: { contains: req.query.q } } : {};
+      const where = req.query.q ? { documentUpload: { contains: req.query.q, mode: 'insensitive' } } : {};
       res.json({ success: true, data: await client.document.findMany({ where, orderBy: { id: 'desc' } }) });
     },
 
