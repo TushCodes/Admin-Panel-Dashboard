@@ -31,7 +31,6 @@ export class UnauthorizedError extends AppError { static statusCode = 401; stati
 export class ForbiddenError extends AppError { static statusCode = 403; static code = 'forbidden'; }
 export class NotFoundError extends AppError { static statusCode = 404; static code = 'not_found'; }
 export class ConflictError extends AppError { static statusCode = 409; static code = 'conflict'; }
-export class ValidationError extends AppError { static statusCode = 422; static code = 'validation_error'; }
 export class InternalServerError extends AppError { static statusCode = 500; static code = 'internal_server_error'; }
 
 export function handleException(exc, { includeDebug = false } = {}) {

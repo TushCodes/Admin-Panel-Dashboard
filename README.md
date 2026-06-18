@@ -62,7 +62,7 @@ npm run build:frontend
 ## Project layout
 
 - `server.js` creates the Express app, serves the frontend, and mounts routes.
-- `routes/` defines resource endpoints and request validation.
+- `routes/` defines resource endpoints and delegates data access to controllers.
 - `controllers/` contains resource handlers.
 - `db/` contains lazy Prisma connection helpers.
 - `frontend/` contains the static Vue MVP screens.
