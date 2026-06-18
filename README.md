@@ -67,5 +67,5 @@ npm run build:frontend
 - `db/` contains lazy Prisma connection helpers.
 - `frontend/` contains the static Vue MVP screens.
 - `services/` contains report generation helpers used by tests and future exports.
-- `utils/` contains shared error, JSON, logging, and pagination helpers.
+- `utils/` contains shared API response, JSON parsing, error, logging, and database connection helpers.
 - `test/` contains Node.js test runner coverage.

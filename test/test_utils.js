@@ -4,7 +4,8 @@ import test from 'node:test';
 import { DatabaseConnectionDisabledError, ensureDatabaseConnectionEnabled } from '../utils/dbError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { BadRequestError, NotFoundError, handleException } from '../utils/errorHandling.js';
-import { APIResponse, DataNormalizer, JsonUtils, jsonResponse, normalizeDelimitedStringList, normalizeForJson, parseJsonBody, toJson } from '../utils/json.js';
+import { APIResponse, jsonResponse } from '../utils/apiResponse.js';
+import { parseJsonBody } from '../utils/json.js';
 import { getLogger } from '../utils/logging.js';
 
 test('parseJsonBody accepts object payloads', () => {
@@ -21,24 +22,8 @@ test('jsonResponse uses the standard envelope', () => {
   assert.deepEqual(payload, { success: true, message: 'Created', data: { id: 1 } });
 });
 
-test('utility class facades expose MVP helpers', () => {
+test('APIResponse facade exposes response helper', () => {
   assert.deepEqual(APIResponse.success({ id: 1 }), [{ success: true, message: 'OK', data: { id: 1 } }, 200]);
-  assert.equal(JsonUtils.toJson({ id: 2n }), '{"id":"2"}');
-  assert.equal(DataNormalizer.normalizeDateOnly('2026-06-18T12:00:00.000Z'), '2026-06-18');
-});
-
-test('toJson serializes dates compactly', () => {
-  assert.equal(toJson({ created_on: new Date('2026-06-09T00:00:00.000Z') }), '{"created_on":"2026-06-09"}');
-});
-
-test('function utility exports cover JSON normalization and responses', () => {
-  assert.deepEqual(normalizeForJson({ id: 1n }), { id: '1' });
-  assert.deepEqual(jsonResponse({ id: 1 }), [{ success: true, message: 'OK', data: { id: 1 } }, 200]);
-});
-
-
-test('data normalization helpers trim delimited lists', () => {
-  assert.deepEqual(normalizeDelimitedStringList(' name, -created_at, ,status '), ['name', '-created_at', 'status']);
 });
 
 test('asyncHandler forwards rejected errors to next', async () => {
