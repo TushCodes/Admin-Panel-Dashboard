@@ -5,7 +5,6 @@ The `utils/` folder is intentionally small. It only contains shared helpers need
 ## Public entry points
 
 - `utils/index.js` is the main barrel export for active shared helpers.
-- `utils/json.js` is a minimal compatibility barrel for JSON request parsing.
 
 ## Included utility areas
 

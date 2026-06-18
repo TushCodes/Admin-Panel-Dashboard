@@ -5,7 +5,7 @@ import { DatabaseConnectionDisabledError, ensureDatabaseConnectionEnabled } from
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { BadRequestError, NotFoundError, handleException } from '../utils/errorHandling.js';
 import { APIResponse, jsonResponse } from '../utils/apiResponse.js';
-import { parseJsonBody } from '../utils/json.js';
+import { parseJsonBody } from '../utils/jsonUtils.js';
 import { getLogger } from '../utils/logging.js';
 
 test('parseJsonBody accepts object payloads', () => {
