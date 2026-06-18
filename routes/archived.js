@@ -2,7 +2,7 @@ import { Router } from 'express';
 
 import { createArchivedController } from '../controllers/index.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
-import { listQuerySchema } from '../validation/schemas.js';
+import { listQuerySchema } from './schemas.js';
 import { validate } from './validation.js';
 
 export function archivedRoutes(options = {}) {

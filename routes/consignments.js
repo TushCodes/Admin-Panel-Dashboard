@@ -2,7 +2,7 @@ import { Router } from 'express';
 
 import { createConsignmentController } from '../controllers/index.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
-import { consignmentSchema, consignmentUpdateSchema, listQuerySchema } from '../validation/schemas.js';
+import { consignmentSchema, consignmentUpdateSchema, listQuerySchema } from './schemas.js';
 import { validate } from './validation.js';
 
 export function consignmentRoutes(options = {}) {
