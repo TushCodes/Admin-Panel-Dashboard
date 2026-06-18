@@ -1,33 +1,33 @@
 import { db } from './db.js';
-import { NotFoundError } from '../utils/errorHandling.js';
+
+const sendNotFound = (res) => res.status(404).json({ success: false, message: 'Consignment not found.' });
 
 export function createConsignmentController({ prisma = null } = {}) {
   return {
     async list(req, res) {
       const client = await db(prisma);
       const { status, q } = req.query;
-      const where = { ...(status ? { status } : {}), ...(q ? { OR: [{ consignmentNum: { contains: q } }, { pickupAddress: { contains: q } }, { dropAddress: { contains: q } }] } : {}) };
-      const items = await client.consignment.findMany({ where, orderBy: { consignmentNum: 'desc' } });
-      res.json({ success: true, data: items });
+      const where = {
+        ...(status ? { status } : {}),
+        ...(q ? { OR: [{ consignmentNum: { contains: q } }, { pickupAddress: { contains: q } }, { dropAddress: { contains: q } }] } : {}),
+      };
+      res.json({ success: true, data: await client.consignment.findMany({ where, orderBy: { consignmentNum: 'desc' } }) });
     },
 
     async create(req, res) {
       const client = await db(prisma);
-      const item = await client.consignment.create({ data: req.body });
-      res.status(201).json({ success: true, message: 'Consignment created.', data: item });
+      res.status(201).json({ success: true, data: await client.consignment.create({ data: req.body }) });
     },
 
     async getByConsignmentNum(req, res) {
       const client = await db(prisma);
-      const item = await client.consignment.findUnique({ where: { consignmentNum: req.params.consignmentNum } });
-      if (!item) throw new NotFoundError('Consignment not found.');
-      res.json({ success: true, data: item });
+      const data = await client.consignment.findUnique({ where: { consignmentNum: req.params.consignmentNum } });
+      return data ? res.json({ success: true, data }) : sendNotFound(res);
     },
 
     async update(req, res) {
       const client = await db(prisma);
-      const item = await client.consignment.update({ where: { consignmentNum: req.params.consignmentNum }, data: req.body });
-      res.json({ success: true, message: 'Consignment updated.', data: item });
+      res.json({ success: true, data: await client.consignment.update({ where: { consignmentNum: req.params.consignmentNum }, data: req.body }) });
     },
   };
 }
