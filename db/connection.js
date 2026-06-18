@@ -27,7 +27,7 @@ export function getSecretKey() {
 }
 
 async function loadPrismaClientClass() {
-  const prismaModule = await import('../prisma/generated/client/index.js');
+  const prismaModule = await import('../models/generated/client/index.js');
   return prismaModule.PrismaClient;
 }
 
