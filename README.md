@@ -68,6 +68,7 @@ npm run test:db
 
 - `server.js` creates the Express app, serves the frontend, and mounts routes.
 - `routes/` defines resource endpoints and delegates data access to controllers.
+- `api/` contains the external API integration scaffold that prepares data for aggregation.
 - `controllers/` contains resource handlers.
 - `db/` contains lazy Prisma connection helpers.
 - `frontend/` contains the static Vue MVP screens.
