@@ -1,15 +1,10 @@
 import { db } from './db.js';
 
-const archivedWhere = (q) => ({
-  status: 'archived',
-  ...(q ? { OR: [{ consignmentNum: { contains: q, mode: 'insensitive' } }, { pickupAddress: { contains: q, mode: 'insensitive' } }, { dropAddress: { contains: q, mode: 'insensitive' } }] } : {}),
-});
-
 export function createArchivedController({ prisma = null } = {}) {
   return {
-    async listConsignments(req, res) {
+    async listConsignments(_req, res) {
       const client = await db(prisma);
-      res.json({ success: true, data: await client.consignment.findMany({ where: archivedWhere(req.query.q), orderBy: { consignmentNum: 'desc' } }) });
+      res.json({ success: true, data: await client.consignment.findMany({ where: { status: 'archived' }, orderBy: { consignmentNum: 'desc' } }) });
     },
 
     async archiveConsignment(req, res) {

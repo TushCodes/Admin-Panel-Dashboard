@@ -24,31 +24,35 @@ function createDelegate(items = []) {
   };
 }
 
-test('list controllers do not pass pagination parameters to Prisma', async () => {
+test('list controllers keep Prisma list queries simple', async () => {
   const cases = [
     {
       controller: createConsignmentController,
       clientKey: 'consignment',
       method: 'list',
-      query: { limit: '500', offset: '25', status: 'active', q: 'ABC' },
+      query: { limit: '500', offset: '25', status: 'active' },
+      expected: { where: { status: 'active' }, orderBy: { consignmentNum: 'desc' } },
     },
     {
       controller: createArchivedController,
       clientKey: 'consignment',
       method: 'listConsignments',
-      query: { limit: '500', offset: '25', q: 'ABC' },
+      query: { limit: '500', offset: '25' },
+      expected: { where: { status: 'archived' }, orderBy: { consignmentNum: 'desc' } },
     },
     {
       controller: createLeadController,
       clientKey: 'lead',
       method: 'list',
-      query: { limit: '500', offset: '25', q: 'ABC' },
+      query: { limit: '500', offset: '25' },
+      expected: { orderBy: { id: 'desc' } },
     },
     {
       controller: createDocumentController,
       clientKey: 'document',
       method: 'list',
-      query: { limit: '500', offset: '25', q: 'ABC' },
+      query: { limit: '500', offset: '25' },
+      expected: { orderBy: { id: 'desc' } },
     },
   ];
 
@@ -60,8 +64,7 @@ test('list controllers do not pass pagination parameters to Prisma', async () =>
     await controller[item.method]({ query: item.query }, response);
 
     assert.equal(delegate.calls.length, 1);
-    assert.equal(Object.hasOwn(delegate.calls[0], 'skip'), false);
-    assert.equal(Object.hasOwn(delegate.calls[0], 'take'), false);
+    assert.deepEqual(delegate.calls[0], item.expected);
     assert.deepEqual(response.payload, { success: true, data: [{ id: 1 }] });
   }
 });
