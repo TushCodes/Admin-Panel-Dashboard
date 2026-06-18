@@ -9,10 +9,10 @@ export function documentRoutes(options = {}) {
   const router = Router();
   const controller = createDocumentController(options);
 
-  router.get('/', validate(listQuerySchema, 'query'), asyncHandler(controller.list));
-  router.post('/', validate(documentSchema), asyncHandler(controller.create));
+  router.get('/', asyncHandler(controller.list));
+  router.post('/', asyncHandler(controller.create));
   router.get('/:id', asyncHandler(controller.getById));
-  router.patch('/:id', validate(documentUpdateSchema), asyncHandler(controller.update));
+  router.patch('/:id', asyncHandler(controller.update));
 
   return router;
 }

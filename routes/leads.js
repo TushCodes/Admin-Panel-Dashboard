@@ -9,10 +9,10 @@ export function leadRoutes(options = {}) {
   const router = Router();
   const controller = createLeadController(options);
 
-  router.get('/', validate(listQuerySchema, 'query'), asyncHandler(controller.list));
-  router.post('/', validate(leadSchema), asyncHandler(controller.create));
+  router.get('/', asyncHandler(controller.list));
+  router.post('/', asyncHandler(controller.create));
   router.get('/:id', asyncHandler(controller.getById));
-  router.patch('/:id', validate(leadUpdateSchema), asyncHandler(controller.update));
+  router.patch('/:id', asyncHandler(controller.update));
 
   return router;
 }
