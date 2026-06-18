@@ -1,7 +1,6 @@
 import { db } from './db.js';
 
 const sendNotFound = (res) => res.status(404).json({ success: false, message: 'Lead not found.' });
-const leadId = (req) => Number(req.params.id);
 
 export function createLeadController({ prisma = null } = {}) {
   return {
@@ -17,14 +16,20 @@ export function createLeadController({ prisma = null } = {}) {
     },
 
     async getById(req, res) {
+      if (!req.params.id) {
+        return res.status(400).json({ message: 'ID is required' });
+      }
       const client = await db(prisma);
-      const data = await client.lead.findUnique({ where: { id: leadId(req) } });
+      const data = await client.lead.findUnique({ where: { id: req.params.id } });
       return data ? res.json({ success: true, data }) : sendNotFound(res);
     },
 
     async update(req, res) {
+      if (!req.params.id) {
+        return res.status(400).json({ message: 'ID is required' });
+      }
       const client = await db(prisma);
-      res.json({ success: true, data: await client.lead.update({ where: { id: leadId(req) }, data: req.body }) });
+      res.json({ success: true, data: await client.lead.update({ where: { id: req.params.id }, data: req.body }) });
     },
   };
 }
