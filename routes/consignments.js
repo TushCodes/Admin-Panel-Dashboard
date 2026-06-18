@@ -8,6 +8,9 @@ export function consignmentRoutes(options = {}) {
   const controller = createConsignmentController(options);
 
   router.get('/aggregated-consignments', asyncHandler(controller.aggregatedConsignmentsList));
+  router.post('/', asyncHandler(controller.create));
+  router.patch('/:consignmentNum', asyncHandler(controller.update));
+  router.delete('/:consignmentNum', asyncHandler(controller.delete));
 
   return router;
 }
