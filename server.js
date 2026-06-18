@@ -6,6 +6,7 @@ import { asyncHandler } from './utils/asyncHandler.js';
 import { handleException } from './utils/errorHandling.js';
 
 const frontendRoot = join(dirname(fileURLToPath(import.meta.url)), 'frontend');
+const repoRoot = dirname(fileURLToPath(import.meta.url));
 
 const allowedFrontendOrigins = new Set([
   'http://localhost:5173',
@@ -39,6 +40,7 @@ export async function createApp({ expressModule = null, morganModule = null, log
 
   if (typeof express.static === 'function' && existsSync(frontendRoot)) {
     app.use('/assets', express.static(join(frontendRoot, 'assets')));
+    app.use('/vendor', express.static(join(repoRoot, 'node_modules', 'vue', 'dist')));
     app.use(express.static(frontendRoot, { index: false }));
     app.get('/auth/login', (_req, res) => res.sendFile(join(frontendRoot, 'index.html')));
     app.get(['/admin', '/admin/consignments', '/admin/lead', '/admin/documents', '/admin/archived'], (_req, res) => res.sendFile(join(frontendRoot, 'index.html')));

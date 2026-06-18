@@ -8,6 +8,7 @@ import morgan from 'morgan';
 const frontendSourceRoot = fileURLToPath(new URL('.', import.meta.url));
 const frontendDistRoot = join(dirname(frontendSourceRoot), 'frontend', 'dist');
 const frontendRoot = existsSync(frontendDistRoot) ? frontendDistRoot : frontendSourceRoot;
+const repoRoot = dirname(frontendSourceRoot);
 const port = process.env.FRONTEND_PORT ?? 5173;
 const host = process.env.FRONTEND_HOST ?? '127.0.0.1';
 const loggerFormat = process.env.MORGAN_FORMAT ?? 'combined';
@@ -20,6 +21,7 @@ app.use(express.static(frontendRoot, {
   extensions: ['html'],
   index: 'index.html',
 }));
+app.use('/vendor', express.static(join(repoRoot, 'node_modules', 'vue', 'dist')));
 
 app.use((req, res) => {
   if (req.accepts('html') && !req.path.includes('.')) {
