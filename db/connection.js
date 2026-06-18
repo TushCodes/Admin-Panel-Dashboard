@@ -1,7 +1,6 @@
 import { ensureDatabaseConnectionEnabled } from '../utils/dbError.js';
 
 export const DATABASE_URL_ENV_NAMES = ['DATABASE_URL'];
-export const SECRET_KEY_ENV_NAMES = ['SECRET_KEY'];
 let cachedClient = null;
 
 export function redactedDatabaseUrl(databaseUrl) {
@@ -18,12 +17,6 @@ export function getDatabaseUrl() {
   const databaseUrl = process.env.DATABASE_URL;
   if (databaseUrl) return databaseUrl;
   throw new Error('Set DATABASE_URL for the database connection.');
-}
-
-export function getSecretKey() {
-  const secretKey = process.env.SECRET_KEY;
-  if (secretKey) return secretKey;
-  throw new Error('Set SECRET_KEY for the secret key.');
 }
 
 async function loadPrismaClientClass() {

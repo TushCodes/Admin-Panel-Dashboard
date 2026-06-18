@@ -21,9 +21,8 @@ The server starts from `server.js` and listens on `PORT` (default `3000`) and `H
 Copy `.env.example` to `.env` and set these values when using the database-backed API:
 
 - `DATABASE_URL`
-- `SECRET_KEY`
 
-The Prisma client is created lazily, so local frontend/static checks can run without a database. Do not commit real database URLs, passwords, or secret keys.
+The Prisma client is created lazily, so local frontend/static checks can run without a database. Do not commit real database URLs or passwords.
 
 ## API routes
 
