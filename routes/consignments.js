@@ -7,6 +7,7 @@
    const router = Router();
    const controller = createConsignmentController(options);
  
+   router.get('/aggregated', asyncHandler(controller.aggregatedList));
    router.get('/', asyncHandler(controller.list));
    router.post('/', asyncHandler(controller.create));
    router.get('/:consignmentNum', asyncHandler(controller.getByConsignmentNum));
