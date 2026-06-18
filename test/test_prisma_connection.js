@@ -26,9 +26,8 @@ class FakePrismaClient {
   }
 }
 
-function restoreEnv(originalDatabaseUrl, originalSecretKey) {
+function restoreDatabaseUrl(originalDatabaseUrl) {
   if (originalDatabaseUrl === undefined) delete process.env.DATABASE_URL; else process.env.DATABASE_URL = originalDatabaseUrl;
-  if (originalSecretKey === undefined) delete process.env.SECRET_KEY; else process.env.SECRET_KEY = originalSecretKey;
 }
 
 test('getDatabaseUrl returns configured database URL', () => {
@@ -51,9 +50,7 @@ test('redactedDatabaseUrl hides passwords', () => {
 
 test('getPrismaClient creates and caches a connected Prisma Client', async () => {
   const originalDatabaseUrl = process.env.DATABASE_URL;
-  const originalSecretKey = process.env.SECRET_KEY;
   process.env.DATABASE_URL = 'postgresql://user:secret@db.example.com:5432/postgres';
-  process.env.SECRET_KEY = 'secret';
   await closeDb();
 
   const prisma = await getPrismaClient({ PrismaClient: FakePrismaClient, PrismaPg: FakePrismaPg });
@@ -65,19 +62,17 @@ test('getPrismaClient creates and caches a connected Prisma Client', async () =>
 
   await closeDb();
   assert.equal(prisma.disconnectedByClient, true);
-  restoreEnv(originalDatabaseUrl, originalSecretKey);
+  restoreDatabaseUrl(originalDatabaseUrl);
 });
 
 test('withDb passes the Prisma Client to callbacks', async () => {
   const originalDatabaseUrl = process.env.DATABASE_URL;
-  const originalSecretKey = process.env.SECRET_KEY;
   process.env.DATABASE_URL = 'postgresql://user:secret@db.example.com:5432/postgres';
-  process.env.SECRET_KEY = 'secret';
   await closeDb();
 
   const rows = await withDb((prisma) => prisma.consignment.findMany(), { PrismaClient: FakePrismaClient, PrismaPg: FakePrismaPg });
   assert.deepEqual(rows, []);
 
   await closeDb();
-  restoreEnv(originalDatabaseUrl, originalSecretKey);
+  restoreDatabaseUrl(originalDatabaseUrl);
 });

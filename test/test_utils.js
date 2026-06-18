@@ -62,12 +62,19 @@ test('getLogger returns namespaced singleton', () => {
   assert.equal(first.handlers.length, 1);
 });
 
-test('ensureDatabaseConnectionEnabled raises without required env vars', () => {
+test('ensureDatabaseConnectionEnabled only requires DATABASE_URL', () => {
   const originalDatabaseUrl = process.env.DATABASE_URL;
   const originalSecretKey = process.env.SECRET_KEY;
-  delete process.env.DATABASE_URL;
+  process.env.DATABASE_URL = 'postgresql://user:secret@db.example.com:5432/postgres';
   delete process.env.SECRET_KEY;
-  assert.throws(() => ensureDatabaseConnectionEnabled(), DatabaseConnectionDisabledError);
+  assert.doesNotThrow(() => ensureDatabaseConnectionEnabled());
   if (originalDatabaseUrl === undefined) delete process.env.DATABASE_URL; else process.env.DATABASE_URL = originalDatabaseUrl;
   if (originalSecretKey === undefined) delete process.env.SECRET_KEY; else process.env.SECRET_KEY = originalSecretKey;
+});
+
+test('ensureDatabaseConnectionEnabled raises without DATABASE_URL', () => {
+  const originalDatabaseUrl = process.env.DATABASE_URL;
+  delete process.env.DATABASE_URL;
+  assert.throws(() => ensureDatabaseConnectionEnabled(), DatabaseConnectionDisabledError);
+  if (originalDatabaseUrl === undefined) delete process.env.DATABASE_URL; else process.env.DATABASE_URL = originalDatabaseUrl;
 });
