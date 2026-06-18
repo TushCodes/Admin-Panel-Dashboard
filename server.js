@@ -7,11 +7,13 @@ import { handleException } from './utils/errorHandling.js';
 
 const frontendRoot = join(dirname(fileURLToPath(import.meta.url)), 'frontend');
 
-function getAllowedOrigins() {
-  return (process.env.CORS_ORIGIN ?? process.env.FRONTEND_ORIGIN ?? 'http://localhost:5173,http://127.0.0.1:5173')
-    .split(',')
-    .map((origin) => origin.trim())
-    .filter(Boolean);
+const allowedFrontendOrigins = new Set([
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+]);
+
+function isAllowedFrontendOrigin(origin) {
+  return allowedFrontendOrigins.has(origin);
 }
 
 export async function createApp({ expressModule = null, morganModule = null, loggerFormat = process.env.MORGAN_FORMAT ?? 'combined', routeOptions = {} } = {}) {
@@ -24,12 +26,13 @@ export async function createApp({ expressModule = null, morganModule = null, log
   app.use(express.json());
   app.use((req, res, next) => {
     const origin = req.headers?.origin;
-    if (origin && getAllowedOrigins().includes(origin)) {
-      res.setHeader('Access-Control-Allow-Origin', origin);
-      res.setHeader('Vary', 'Origin');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
-    }
+    if (!origin || !isAllowedFrontendOrigin(origin)) return next();
+
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH');
+
     if (req.method === 'OPTIONS') return res.sendStatus(204);
     return next();
   });
