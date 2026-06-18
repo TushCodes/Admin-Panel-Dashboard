@@ -1,33 +1,30 @@
 import { db } from './db.js';
-import { NotFoundError } from '../utils/errorHandling.js';
+
+const sendNotFound = (res) => res.status(404).json({ success: false, message: 'Document not found.' });
+const documentId = (req) => Number(req.params.id);
 
 export function createDocumentController({ prisma = null } = {}) {
   return {
     async list(req, res) {
       const client = await db(prisma);
-      const { q } = req.query;
-      const where = q ? { documentUpload: { contains: q } } : {};
-      const items = await client.document.findMany({ where, orderBy: { id: 'desc' } });
-      res.json({ success: true, data: items });
+      const where = req.query.q ? { documentUpload: { contains: req.query.q } } : {};
+      res.json({ success: true, data: await client.document.findMany({ where, orderBy: { id: 'desc' } }) });
     },
 
     async create(req, res) {
       const client = await db(prisma);
-      const item = await client.document.create({ data: req.body });
-      res.status(201).json({ success: true, message: 'Document created.', data: item });
+      res.status(201).json({ success: true, data: await client.document.create({ data: req.body }) });
     },
 
     async getById(req, res) {
       const client = await db(prisma);
-      const item = await client.document.findUnique({ where: { id: Number(req.params.id) } });
-      if (!item) throw new NotFoundError('Document not found.');
-      res.json({ success: true, data: item });
+      const data = await client.document.findUnique({ where: { id: documentId(req) } });
+      return data ? res.json({ success: true, data }) : sendNotFound(res);
     },
 
     async update(req, res) {
       const client = await db(prisma);
-      const item = await client.document.update({ where: { id: Number(req.params.id) }, data: req.body });
-      res.json({ success: true, message: 'Document updated.', data: item });
+      res.json({ success: true, data: await client.document.update({ where: { id: documentId(req) }, data: req.body }) });
     },
   };
 }

@@ -1,33 +1,30 @@
 import { db } from './db.js';
-import { NotFoundError } from '../utils/errorHandling.js';
+
+const sendNotFound = (res) => res.status(404).json({ success: false, message: 'Lead not found.' });
+const leadId = (req) => Number(req.params.id);
 
 export function createLeadController({ prisma = null } = {}) {
   return {
     async list(req, res) {
       const client = await db(prisma);
-      const { q } = req.query;
-      const where = q ? { OR: [{ name: { contains: q } }, { email: { contains: q } }, { phone: { contains: q } }, { subject: { contains: q } }] } : {};
-      const items = await client.lead.findMany({ where, orderBy: { id: 'desc' } });
-      res.json({ success: true, data: items });
+      const where = req.query.q ? { OR: [{ name: { contains: req.query.q } }, { email: { contains: req.query.q } }, { phone: { contains: req.query.q } }, { subject: { contains: req.query.q } }] } : {};
+      res.json({ success: true, data: await client.lead.findMany({ where, orderBy: { id: 'desc' } }) });
     },
 
     async create(req, res) {
       const client = await db(prisma);
-      const item = await client.lead.create({ data: req.body });
-      res.status(201).json({ success: true, message: 'Lead created.', data: item });
+      res.status(201).json({ success: true, data: await client.lead.create({ data: req.body }) });
     },
 
     async getById(req, res) {
       const client = await db(prisma);
-      const item = await client.lead.findUnique({ where: { id: Number(req.params.id) } });
-      if (!item) throw new NotFoundError('Lead not found.');
-      res.json({ success: true, data: item });
+      const data = await client.lead.findUnique({ where: { id: leadId(req) } });
+      return data ? res.json({ success: true, data }) : sendNotFound(res);
     },
 
     async update(req, res) {
       const client = await db(prisma);
-      const item = await client.lead.update({ where: { id: Number(req.params.id) }, data: req.body });
-      res.json({ success: true, message: 'Lead updated.', data: item });
+      res.json({ success: true, data: await client.lead.update({ where: { id: leadId(req) }, data: req.body }) });
     },
   };
 }
