@@ -4,10 +4,9 @@ const sendNotFound = (res) => res.status(404).json({ success: false, message: 'D
 
 export function createDocumentController({ prisma = null } = {}) {
   return {
-    async list(req, res) {
+    async list(_req, res) {
       const client = await db(prisma);
-      const where = req.query.q ? { documentUpload: { contains: req.query.q, mode: 'insensitive' } } : {};
-      res.json({ success: true, data: await client.document.findMany({ where, orderBy: { id: 'desc' } }) });
+      res.json({ success: true, data: await client.document.findMany({ orderBy: { id: 'desc' } }) });
     },
 
     async create(req, res) {

@@ -6,11 +6,7 @@ export function createConsignmentController({ prisma = null } = {}) {
   return {
     async list(req, res) {
       const client = await db(prisma);
-      const { status, q } = req.query;
-      const where = {
-        ...(status ? { status } : {}),
-        ...(q ? { OR: [{ consignmentNum: { contains: q, mode: 'insensitive' } }, { pickupAddress: { contains: q, mode: 'insensitive' } }, { dropAddress: { contains: q, mode: 'insensitive' } }] } : {}),
-      };
+      const where = req.query.status ? { status: req.query.status } : {};
       res.json({ success: true, data: await client.consignment.findMany({ where, orderBy: { consignmentNum: 'desc' } }) });
     },
 
