@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "test": "node --test",
+    "test:db": "node scripts/check-db-connection.mjs",
+    "dev:db": "node scripts/check-db-connection.mjs",
     "prisma:generate": "prisma generate",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",

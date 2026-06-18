@@ -5,6 +5,7 @@ let cachedClient = null;
 
 export function redactedDatabaseUrl(databaseUrl) {
   try {
+    // converts dbUrl to URL object, redacts the password and returns the string
     const url = new URL(databaseUrl);
     if (url.password) url.password = '***';
     return url.toString();

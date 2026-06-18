@@ -51,6 +51,12 @@ For frontend-only local work, run:
 npm run build:frontend
 ```
 
+To smoke-test the database connection, run:
+
+```bash
+npm run test:db
+```
+
 ## Prisma workflow
 
 - `models/schema.prisma` is the source of truth for the database model.
