@@ -54,7 +54,7 @@ npm run build:frontend
 
 ## Prisma workflow
 
-- `prisma/schema.prisma` is the source of truth for the database model.
+- `models/schema.prisma` is the source of truth for the database model.
 - `npm run prisma:generate` regenerates Prisma Client after schema changes.
 - `npm run prisma:migrate:dev` creates and applies development migrations.
 - `npm run prisma:migrate:deploy` applies committed migrations in deployment environments.
