@@ -1,46 +1,29 @@
 import { BadRequestError } from './errorHandling.js';
-import { normalizeForJson } from './dataNormalization.js';
 
-export class JsonUtils {
-  static toJson(payload) {
-    return toJson(payload);
+export function parseJsonBody(rawBody) {
+  if (rawBody == null) throw new BadRequestError('Request body cannot be empty.');
+
+  if (rawBody && typeof rawBody === 'object' && !Buffer.isBuffer(rawBody) && !(rawBody instanceof Uint8Array)) {
+    if (Array.isArray(rawBody)) throw new BadRequestError('Request body must be a JSON object.');
+    return { ...rawBody };
   }
 
-  static fromJson(rawBody) {
-    return fromJson(rawBody);
-  }
+  const text = Buffer.isBuffer(rawBody) || rawBody instanceof Uint8Array
+    ? Buffer.from(rawBody).toString('utf8')
+    : rawBody;
 
-  static parseJsonBody(rawBody, options = {}) {
-    return parseJsonBody(rawBody, options);
-  }
-}
-
-export function toJson(payload) {
-  return JSON.stringify(normalizeForJson(payload));
-}
-
-export function fromJson(rawBody) {
-  let text = rawBody;
-  if (rawBody instanceof Uint8Array || Buffer.isBuffer(rawBody)) {
-    text = Buffer.from(rawBody).toString('utf8');
-  }
   if (typeof text !== 'string' || !text.trim()) {
     throw new BadRequestError('Request body cannot be empty.');
   }
+
   try {
-    return JSON.parse(text);
+    const parsedBody = JSON.parse(text);
+    if (!parsedBody || typeof parsedBody !== 'object' || Array.isArray(parsedBody)) {
+      throw new BadRequestError('Request body must be a JSON object.');
+    }
+    return parsedBody;
   } catch (error) {
+    if (error instanceof BadRequestError) throw error;
     throw new BadRequestError('Request body contains invalid JSON.', { details: { message: error.message } });
   }
-}
-
-export function parseJsonBody(rawBody, { requireObject = true } = {}) {
-  if (rawBody == null) throw new BadRequestError('Request body cannot be empty.');
-  const parsedBody = rawBody && typeof rawBody === 'object' && !Buffer.isBuffer(rawBody) && !(rawBody instanceof Uint8Array)
-    ? { ...rawBody }
-    : fromJson(rawBody);
-  if (requireObject && (!parsedBody || typeof parsedBody !== 'object' || Array.isArray(parsedBody))) {
-    throw new BadRequestError('Request body must be a JSON object.');
-  }
-  return parsedBody;
 }
