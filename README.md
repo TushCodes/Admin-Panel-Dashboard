@@ -29,9 +29,6 @@ The Prisma client is created lazily, so local frontend/static checks can run wit
 - `GET /consignments/aggregated-consignments`
 - `GET|POST /leads`, `GET|PATCH /leads/:id`
 - `GET|POST /documents`, `GET|PATCH /documents/:id`
-- `GET /archived/consignments`
-- `POST /archived/consignments/:consignmentNum`
-- `POST /archived/consignments/:consignmentNum/restore`
 - `GET /health`
 
 ## Frontend
@@ -43,7 +40,6 @@ The static MVP frontend lives in `frontend/` and is served by the main Express a
 - `/admin/consignments`
 - `/admin/lead`
 - `/admin/documents`
-- `/admin/archived`
 
 For frontend-only local work, run:
 

@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { createArchivedController } from '../controllers/archived.js';
 import { createDocumentController } from '../controllers/documents.js';
 import { createLeadController } from '../controllers/leads.js';
 
@@ -25,13 +24,6 @@ function createDelegate(items = []) {
 
 test('list controllers keep Prisma list queries simple', async () => {
   const cases = [
-    {
-      controller: createArchivedController,
-      clientKey: 'consignment',
-      method: 'listConsignments',
-      query: { limit: '500', offset: '25' },
-      expected: { where: { status: 'archived' }, orderBy: { consignmentNum: 'desc' } },
-    },
     {
       controller: createLeadController,
       clientKey: 'lead',

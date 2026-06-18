@@ -8,7 +8,6 @@ export const adminSections = {
   consignments: { path: '/admin/consignments', title: 'Consignments', label: 'Consignments', icon: '▣' },
   leads: { path: '/admin/lead', title: 'Leads', label: 'Leads', icon: '♚' },
   documents: { path: '/admin/documents', title: 'Documents', label: 'Documents', icon: '☷' },
-  archived: { path: '/admin/archived', title: 'Archive', label: 'Archive', icon: '◴' },
 };
 
 export const AdminWelcomePage = {
@@ -22,9 +21,8 @@ export const AdminWelcomePage = {
       { title: 'Consignment Sheet', description: 'Manage & export consignments', icon: '▣', accent: 'blue', path: adminSections.consignments.path },
       { title: 'Leads Panel', description: 'View customer enquiries', icon: '♚', accent: 'green', path: adminSections.leads.path },
       { title: 'Documents', description: 'Review document uploads', icon: '☷', accent: 'purple', path: adminSections.documents.path },
-      { title: 'Archive', description: 'View archived consignments', icon: '◴', accent: 'orange', path: adminSections.archived.path },
     ];
-    const stats = [{ value: '04', label: 'Active modules' }, { value: '24/7', label: 'Admin access' }, { value: '1-click', label: 'Backup ready' }];
+    const stats = [{ value: '03', label: 'Active modules' }, { value: '24/7', label: 'Admin access' }, { value: '1-click', label: 'Backup ready' }];
     function navigate(path) { emit('navigate', path); }
     return { adminLoginPageRoute, currentSection, menuItems, quickLinks, stats, navigate };
   },
