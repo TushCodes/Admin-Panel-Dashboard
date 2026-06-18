@@ -6,7 +6,7 @@ export function createLeadController({ prisma = null } = {}) {
   return {
     async list(req, res) {
       const client = await db(prisma);
-      const where = req.query.q ? { OR: [{ name: { contains: req.query.q } }, { email: { contains: req.query.q } }, { phone: { contains: req.query.q } }, { subject: { contains: req.query.q } }] } : {};
+      const where = req.query.q ? { OR: [{ name: { contains: req.query.q, mode: 'insensitive' } }, { email: { contains: req.query.q, mode: 'insensitive' } }, { phone: { contains: req.query.q, mode: 'insensitive' } }, { subject: { contains: req.query.q, mode: 'insensitive' } }] } : {};
       res.json({ success: true, data: await client.lead.findMany({ where, orderBy: { id: 'desc' } }) });
     },
 
