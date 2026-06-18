@@ -25,8 +25,9 @@ function createResponse() {
   return {
     statusCode: 200,
     payload: null,
+    headers: {},
     status(code) { this.statusCode = code; return this; },
-    setHeader() { return this; },
+    setHeader(name, value) { this.headers[name] = value; return this; },
     sendStatus(code) { this.statusCode = code; return this; },
     json(payload) { this.payload = payload; return this; },
   };
@@ -68,6 +69,36 @@ test('createApp wires basic Express routes and middleware', async () => {
   await health.handler({}, healthResponse);
   assert.equal(healthResponse.payload.status, 'ok');
   assert.match(healthResponse.payload.timestamp, /^\d{4}-\d{2}-\d{2}T/);
+});
+
+test('CORS middleware only allows the local MVP frontend origins', async () => {
+  const fakeExpress = createFakeExpress();
+  const app = await createApp({ expressModule: fakeExpress, morganModule: () => 'request-logger' });
+  const corsMiddleware = app.middleware[2];
+
+  const allowedResponse = createResponse();
+  await corsMiddleware(
+    { method: 'OPTIONS', headers: { origin: 'http://localhost:5173' } },
+    allowedResponse,
+    () => assert.fail('allowed CORS preflight should not continue'),
+  );
+
+  assert.equal(allowedResponse.statusCode, 204);
+  assert.equal(allowedResponse.headers['Access-Control-Allow-Origin'], 'http://localhost:5173');
+  assert.equal(allowedResponse.headers['Access-Control-Allow-Headers'], 'Content-Type');
+  assert.equal(allowedResponse.headers['Access-Control-Allow-Methods'], 'GET, POST, PATCH');
+  assert.equal(allowedResponse.headers['Access-Control-Allow-Credentials'], undefined);
+
+  const blockedResponse = createResponse();
+  let continued = false;
+  await corsMiddleware(
+    { method: 'OPTIONS', headers: { origin: 'http://example.com' } },
+    blockedResponse,
+    () => { continued = true; },
+  );
+
+  assert.equal(continued, true);
+  assert.deepEqual(blockedResponse.headers, {});
 });
 
 test('resource routes are mounted without a versioned API prefix', async () => {
