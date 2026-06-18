@@ -7,9 +7,9 @@ import express from 'express';
 
 import { CONSIGNMENT_LIST_ORDER } from '../db/consignments.js';
 import { consignmentRoutes } from '../routes/consignments.js';
-import { DATA_SOURCES, fetchAggregatedList } from '../services/dataAggregator.js';
+import { DATA_SOURCES, fetchAggregatedConsignmentsList } from '../services/dataAggregator.js';
 
-test('fetchAggregatedList builds an aggregated list from consignments', async () => {
+test('fetchAggregatedConsignmentsList builds an aggregated list from consignments', async () => {
   const rows = [
     { consignmentNum: 'CN00000000000002', status: 'created' },
     { consignmentNum: 'CN00000000000001', status: 'delivered' },
@@ -24,7 +24,7 @@ test('fetchAggregatedList builds an aggregated list from consignments', async ()
     },
   };
 
-  const result = await fetchAggregatedList({ prisma });
+  const result = await fetchAggregatedConsignmentsList({ prisma });
 
   assert.deepEqual(calls, [{ orderBy: CONSIGNMENT_LIST_ORDER }]);
   assert.deepEqual(result, [
@@ -33,7 +33,7 @@ test('fetchAggregatedList builds an aggregated list from consignments', async ()
   ]);
 });
 
-test('GET /consignments/aggregated serves the data aggregator output', async () => {
+test('GET /consignments/aggregated-consignments serves the data aggregator output', async () => {
   const rows = [{ consignmentNum: 'CN00000000000003', status: 'in_transit' }];
   const calls = [];
   const prisma = {
@@ -52,7 +52,7 @@ test('GET /consignments/aggregated serves the data aggregator output', async () 
 
   try {
     const { port } = server.address();
-    const response = await fetch(`http://127.0.0.1:${port}/consignments/aggregated`);
+    const response = await fetch(`http://127.0.0.1:${port}/consignments/aggregated-consignments`);
     const payload = await response.json();
 
     assert.equal(response.status, 200);

@@ -58,7 +58,7 @@ export async function createApp({ expressModule = null, morganModule = null, log
       endpoints: {
         health: '/health',
         login: '/auth/login',
-        consignments: '/consignments',
+        consignments: '/consignments/aggregated-consignments',
         leads: '/leads',
         documents: '/documents',
         archived: '/archived/consignments',

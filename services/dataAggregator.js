@@ -11,7 +11,7 @@ function toAggregatedItem(record, source) {
   };
 }
 
-export async function fetchAggregatedList(options = {}) {
+export async function fetchAggregatedConsignmentsList(options = {}) {
   const consignments = await fetchConsignmentList(options);
   return consignments.map((record) => toAggregatedItem(record, DATA_SOURCES.CONSIGNMENTS));
 }

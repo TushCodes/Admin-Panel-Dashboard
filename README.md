@@ -26,7 +26,7 @@ The Prisma client is created lazily, so local frontend/static checks can run wit
 
 ## API routes
 
-- `GET|POST /consignments`, `GET|PATCH /consignments/:consignmentNum`
+- `GET /consignments/aggregated-consignments`
 - `GET|POST /leads`, `GET|PATCH /leads/:id`
 - `GET|POST /documents`, `GET|PATCH /documents/:id`
 - `GET /archived/consignments`
@@ -71,6 +71,6 @@ npm run test:db
 - `controllers/` contains resource handlers.
 - `db/` contains lazy Prisma connection helpers.
 - `frontend/` contains the static Vue MVP screens.
-- `services/` contains report generation helpers used by tests and future exports.
+- `services/` contains dashboard aggregation helpers used by tests and the frontend.
 - `utils/` contains shared API response, JSON parsing, error, logging, and database connection helpers.
 - `test/` contains Node.js test runner coverage.

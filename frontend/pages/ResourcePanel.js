@@ -1,7 +1,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 
 const apiPaths = {
-  consignments: '/consignments',
+  consignments: '/consignments/aggregated-consignments',
   leads: '/leads',
   documents: '/documents',
   archived: '/archived/consignments',
