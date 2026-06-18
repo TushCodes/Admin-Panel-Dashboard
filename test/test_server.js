@@ -59,7 +59,7 @@ test('createApp wires basic Express routes and middleware', async () => {
   assert.deepEqual(rootResponse.payload.endpoints, {
     health: '/health',
     login: '/auth/login',
-    consignments: '/consignments/aggregated-consignments',
+    consignments: '/consignments',
     leads: '/leads',
     documents: '/documents',
   });
@@ -85,7 +85,7 @@ test('CORS middleware only allows the local MVP frontend origins', async () => {
   assert.equal(allowedResponse.statusCode, 204);
   assert.equal(allowedResponse.headers['Access-Control-Allow-Origin'], 'http://localhost:5173');
   assert.equal(allowedResponse.headers['Access-Control-Allow-Headers'], 'Content-Type');
-  assert.equal(allowedResponse.headers['Access-Control-Allow-Methods'], 'GET, POST, PATCH');
+  assert.equal(allowedResponse.headers['Access-Control-Allow-Methods'], 'GET, POST, PATCH, DELETE');
   assert.equal(allowedResponse.headers['Access-Control-Allow-Credentials'], undefined);
 
   const blockedResponse = createResponse();
