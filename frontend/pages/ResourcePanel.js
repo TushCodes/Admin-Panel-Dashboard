@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
 const apiPaths = {
   consignments: '/consignments',
@@ -21,30 +21,45 @@ export const ResourcePanel = {
     }[props.section]));
 
     async function loadItems() {
+      const section = props.section;
+      const path = apiPaths[section];
+      if (!path) {
+        error.value = 'Unknown resource section.';
+        items.value = [];
+        return;
+      }
+
       loading.value = true;
       error.value = '';
       try {
-        const response = await fetch(apiPaths[props.section]);
+        const response = await fetch(path);
         if (!response.ok) throw new Error(`Request failed with ${response.status}`);
         const payload = await response.json();
-        items.value = payload.data ?? [];
+        if (props.section === section) items.value = payload.data ?? [];
       } catch (err) {
-        error.value = err.message;
+        if (props.section === section) error.value = err.message;
       } finally {
-        loading.value = false;
+        if (props.section === section) loading.value = false;
       }
     }
 
-    loadItems();
+    onMounted(loadItems);
+
+    watch(() => props.section, () => {
+      items.value = [];
+      loadItems();
+    });
+
     return { config, items, loading, error, loadItems };
   },
   template: `
     <section class="admin-panel-card" :aria-labelledby="section + '-title'">
-      <div class="admin-panel-header">
+      <div v-if="config" class="admin-panel-header">
         <div><p class="admin-eyebrow">{{ config.eyebrow }}</p><h2 :id="section + '-title'">{{ config.title }}</h2><p>{{ config.description }}</p></div>
         <button class="admin-refresh-button" type="button" @click="loadItems">Refresh</button>
       </div>
-      <p v-if="loading" class="admin-state-text">Loading {{ config.title.toLowerCase() }}…</p>
+      <p v-if="!config" class="admin-state-text is-error">Unknown resource section.</p>
+      <p v-else-if="loading" class="admin-state-text">Loading {{ config.title.toLowerCase() }}…</p>
       <p v-else-if="error" class="admin-state-text is-error">{{ error }}</p>
       <div v-else class="admin-table-wrap"><table class="admin-table"><thead><tr><th v-for="column in config.columns" :key="column">{{ column }}</th></tr></thead><tbody><tr v-if="!items.length"><td :colspan="config.columns.length">No records found.</td></tr><tr v-for="item in items" :key="item.id ?? item.consignmentNum"><td v-for="field in config.fields" :key="field">{{ item[field] || '—' }}</td></tr></tbody></table></div>
     </section>
