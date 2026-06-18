@@ -2,6 +2,8 @@ import { Router } from 'express';
 
 import { createArchivedController } from '../controllers/index.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
+import { listQuerySchema } from '../models/schemas.js';
+import { validate } from './validation.js';
 
 export function archivedRoutes(options = {}) {
   const router = Router();
