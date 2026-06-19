@@ -21,7 +21,7 @@ export function getDatabaseUrl() {
 }
 
 async function loadPrismaClientClass() {
-  const prismaModule = await import('../models/generated/client/index.js');
+  const prismaModule = await import('../models/generated/client/client.ts');
   return prismaModule.PrismaClient;
 }
 
