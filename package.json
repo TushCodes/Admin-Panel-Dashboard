@@ -11,6 +11,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
+    "seed": "node scripts/seed.mjs",
     "frontend": "node frontend/serve.js",
     "build:css": "node scripts/build-tailwind.mjs",
     "dev:frontend": "node frontend/serve.js",
