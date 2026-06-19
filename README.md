@@ -60,6 +60,10 @@ npm run test:db
 - `npm run prisma:migrate:dev` creates and applies development migrations.
 - `npm run prisma:migrate:deploy` applies committed migrations in deployment environments.
 
+## Onboarding / KT
+
+This branch includes a structured knowledge-transfer path for junior and frontend-leaning developers in [`docs/knowledge-transfer.md`](docs/knowledge-transfer.md). Use it as the recommended sequence for setup, request-lifecycle walkthroughs, backend/frontend boundaries, Prisma workflow, testing expectations, debugging, and capstone exercises.
+
 ## Project layout
 
 - `server.js` creates the Express app, serves the frontend, and mounts routes.
